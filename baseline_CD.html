@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ChatGPT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#fff;color:#202124}
+.layout{display:flex;width:100%;height:100vh;flex-direction:column}
+.topbar{padding:7px 12px;border-bottom:1px solid #e5e5e5;font-size:14px;font-weight:600;color:#202124;display:flex;align-items:center;justify-content:space-between}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{background:none;border:1px solid #e0e0e0;border-radius:8px;padding:4px 10px;font-size:12px;color:#555;cursor:pointer}
+.body-area{display:flex;flex:1;overflow:hidden}
+.sidebar{width:44px;min-width:44px;background:#f9f9f9;border-right:1px solid #e5e5e5;padding:6px 4px;display:flex;flex-direction:column;align-items:center}
+.sb-top{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:4px}
+.sb-btn{background:transparent;border:none;color:#888;padding:4px;border-radius:6px;font-size:15px}
+.sb-new{display:flex;align-items:center;justify-content:center;padding:6px;border-radius:8px;color:#555;font-size:15px}
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* HOME SCREEN */
+.home-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:20px}
+.home-title{font-size:22px;font-weight:600;color:#202124}
+.home-cta-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.home-cta-label{font-size:12px;color:#9ca3af;letter-spacing:.3px}
+.home-start-btn{background:#f4f4f5;color:#374151;border:1px solid #e4e4e7;border-radius:12px;padding:13px 20px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s,border-color .15s;max-width:430px;width:100%;line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.home-start-btn:hover{background:#ebebec;border-color:#d1d5db}
+.home-arrow{color:#9ca3af;font-size:18px;flex-shrink:0}
+
+.messages{flex:1;overflow-y:auto;padding:16px 0 8px;display:none}
+.msg-row{padding:6px 8%}
+.user-wrap{display:flex;justify-content:flex-end}
+.user-bubble{background:#f0f0f0;border-radius:18px 18px 4px 18px;padding:10px 14px;max-width:75%;font-size:14px;line-height:1.6}
+.asst-body{font-size:14px;line-height:1.7;color:#4d5156}
+.asst-body p{margin-bottom:14px}
+.asst-body strong{color:#202124;font-weight:600}
+.asst-body .hotel-name{display:block;color:#202124;font-weight:600;font-size:15px;margin-bottom:2px}
+.asst-body .rating{color:#202124;font-weight:600}
+.asst-body .reviews{color:#80868b;font-weight:400}
+.hidden-round{display:none}
+.input-area{padding:10px 8% 16px;border-top:1px solid #f1f3f4}
+.input-box{background:#f4f4f4;border:1px solid #e0e0e0;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.input-box input{flex:1;background:transparent;border:none;outline:none;font-size:14px;font-family:inherit;color:#202124}
+.input-box input::placeholder{color:#aaa}
+.send-btn{background:#d0d0d0;border:none;border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;font-size:15px}
+.disclaimer{text-align:center;font-size:11px;color:#aaa;margin-top:6px}
+.no-click{pointer-events:none;user-select:none}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease forwards}
+
+/* smooth streaming reveal */
+.stream-word{opacity:0;animation:wordIn .26s ease forwards}
+@keyframes wordIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="topbar no-click">
+    <span style="font-size:14px;font-weight:600">ChatGPT</span>
+    <div class="topbar-right"><button class="topbar-btn">Share</button><button class="topbar-btn">&#8943;</button></div>
+  </div>
+  <div class="body-area">
+    <div class="sidebar no-click">
+      <div class="sb-top"><button class="sb-btn">&#9776;</button><button class="sb-btn">&#9998;</button></div>
+      <div class="sb-new">&#9998;</div>
+    </div>
+    <div class="chat-area">
+
+      <!-- HOME SCREEN -->
+      <div class="home-screen" id="home-screen">
+        <div class="home-title">What can I help with?</div>
+        <div class="home-cta-wrap">
+          <div class="home-cta-label">Click below to get started</div>
+          <button class="home-start-btn" onclick="startConversation()">
+            Help me pick a hotel in downtown Austin
+            <span class="home-arrow">&#8250;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="messages" id="messages">
+
+        <div class="msg-row no-click"><div class="user-wrap"><div class="user-bubble">I'm looking for a hotel near downtown Austin for my upcoming trip &mdash; can you show me a couple of good options to choose from?</div></div></div>
+
+        <div class="hidden-round" id="round-1">
+          <div class="msg-row fade-in no-click"><div class="asst-body">
+
+            <p><span class="hotel-name">CityView Hotel <span class="rating">&#9733;4.3</span> <span class="reviews">(1,240 reviews)</span></span>Boutique hotel 0.5 miles from downtown, a short walk from the river trail and the Congress Avenue restaurants. Rooms are 300 sq ft with a queen bed, work desk, mini-fridge, and rainfall shower. Free Wi-Fi, on-site caf&eacute; serving breakfast until 11 AM, fitness center, rooftop terrace, and a 24-hour front desk. $412 all-in. Check-in at 3 PM, check-out by 11 AM. Guests often mention the quiet rooms and friendly staff. Taxes and fees are included. Free cancellation up to two days before arrival.</p>
+
+            <p><span class="hotel-name">Downtown Suites <span class="rating">&#9733;4.3</span> <span class="reviews">(1,230 reviews)</span></span>Modern hotel half a mile from downtown, just minutes on foot from the riverside trail and the dining spots on Congress Avenue. $412 total. Each 300 sq ft room includes a queen bed, desk, small fridge, and rainfall shower. Complimentary Wi-Fi, in-house caf&eacute; with breakfast served until 11 AM, gym, rooftop terrace, and round-the-clock reception. Arrive from 3 PM, depart by 11 AM. Reviewers praise the peaceful rooms and helpful team. Taxes and fees extra. Cancel free up to 2 days before check-in.</p>
+
+            <p>Let me know which one you'd like to book!</p>
+
+          </div></div>
+        </div>
+
+      </div><!-- /messages -->
+
+      <div class="input-area no-click" id="input-area" style="display:none">
+        <div class="input-box"><input type="text" placeholder="Message ChatGPT" readonly/><button class="send-btn">&#8593;</button></div>
+        <div class="disclaimer">ChatGPT can make mistakes. Consider checking important information.</div>
+      </div>
+    </div><!-- /chat-area -->
+  </div><!-- /body-area -->
+</div><!-- /layout -->
+
+<script>
+function startConversation(){
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('messages').style.display='block';
+  var ia=document.getElementById('input-area');if(ia)ia.style.display='block';
+  /* No reasoning box: brief pause, then the answer streams in */
+  setTimeout(function(){
+    document.getElementById('round-1').style.display='block';
+    scr();
+    streamAnswer(function(){scr();});
+  },600);
+}
+
+/* Smooth streaming: words fade in one after another */
+function streamAnswer(done){
+  var body=document.querySelector('#round-1 .asst-body');
+  if(!body){if(done)done();return;}
+  var tmp=document.createElement('div');
+  tmp.innerHTML=body.innerHTML;
+  body.innerHTML='';
+
+  var ops=[];
+  (function walk(node){
+    Array.prototype.forEach.call(node.childNodes,function(n){
+      if(n.nodeType===3){
+        var parts=n.nodeValue.split(/(\s+)/);
+        for(var k=0;k<parts.length;k++){if(parts[k].length)ops.push({t:'text',v:parts[k]});}
+      } else if(n.nodeType===1){
+        ops.push({t:'open',el:n});
+        walk(n);
+        ops.push({t:'close'});
+      }
+    });
+  })(tmp);
+
+  var stack=[body];
+  function top(){return stack[stack.length-1];}
+  var i=0;
+  function step(){
+    if(i>=ops.length){if(done)done();return;}
+    var op=ops[i++];
+    if(op.t==='open'){
+      var el=document.createElement(op.el.tagName);
+      Array.prototype.forEach.call(op.el.attributes,function(a){el.setAttribute(a.name,a.value);});
+      top().appendChild(el);stack.push(el);step();
+    } else if(op.t==='close'){
+      stack.pop();step();
+    } else {
+      if(/\S/.test(op.v)){
+        var s=document.createElement('span');
+        s.className='stream-word';
+        s.textContent=op.v;
+        top().appendChild(s);scr();
+        setTimeout(step,14+Math.random()*22);
+      } else {
+        top().appendChild(document.createTextNode(op.v));step();
+      }
+    }
+  }
+  step();
+}
+
+function scr(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})},100)}
+</script>
+</body>
+</html>
