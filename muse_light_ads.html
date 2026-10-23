@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Muse</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#fff;color:#202124}
+.layout{display:flex;width:100%;height:100vh;flex-direction:column}
+.topbar{padding:7px 12px;border-bottom:1px solid #e5e5e5;font-size:14px;font-weight:600;color:#202124;display:flex;align-items:center;justify-content:space-between}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{background:none;border:1px solid #e0e0e0;border-radius:8px;padding:4px 10px;font-size:12px;color:#555;cursor:pointer}
+.body-area{display:flex;flex:1;overflow:hidden}
+.sidebar{width:64px;min-width:64px;background:#f7f8fa;border-right:1px solid #e5e5e5;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sb-tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#8a8f98;padding:6px 4px;border-radius:10px;width:56px}
+.sb-tab.on{color:#0866ff;background:#e9f0ff;font-weight:600}
+.sb-ic{font-size:15px}
+.m-logo{width:22px;height:22px;border-radius:7px;background:#0866ff;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.av{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:#e9dcc7}
+.asst-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12.5px;font-weight:600;color:#3c4043}
+.av-wrap{position:relative;width:34px;height:34px;flex-shrink:0}
+.av-wrap .av{width:34px;height:34px}
+.av-wrap .lap{position:absolute;top:-7px;right:-6px;font-size:12px;background:#fff;border-radius:50%;padding:1px;box-shadow:0 1px 3px rgba(0,0,0,.2);line-height:1}
+.sb-top{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:4px}
+.sb-btn{background:transparent;border:none;color:#888;padding:4px;border-radius:6px;font-size:15px}
+.sb-new{display:flex;align-items:center;justify-content:center;padding:6px;border-radius:8px;color:#555;font-size:15px}
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* HOME SCREEN (adopted from old design) */
+.home-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px}
+.home-title{font-size:22px;font-weight:600;color:#202124}
+.home-cta-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.home-cta-label{font-size:12px;color:#9ca3af;letter-spacing:.3px}
+.home-start-btn{background:#f4f4f5;color:#374151;border:1px solid #e4e4e7;border-radius:12px;padding:13px 20px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s,border-color .15s;max-width:430px;width:100%;line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.home-start-btn:hover{background:#ebebec;border-color:#d1d5db}
+.home-arrow{color:#9ca3af;font-size:18px;flex-shrink:0}
+
+.messages{flex:1;overflow-y:auto;padding:16px 0 8px;display:none}
+.msg-row{padding:6px 8%}
+.divider{margin:4px 8%;border:none;border-top:1px dashed #e5e5e5}
+.user-wrap{display:flex;justify-content:flex-end}
+.user-bubble{background:#0866ff;color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;max-width:75%;font-size:14px;line-height:1.6}
+.asst-body{font-size:14px;line-height:1.7;color:#4d5156}
+.asst-body p{margin-bottom:14px}
+.asst-body ol,.asst-body ul{padding-left:20px;margin-bottom:10px}
+.asst-body li{margin-bottom:6px}
+.asst-body strong{color:#202124;font-weight:600}
+.asst-body .hotel-name{display:block;color:#202124;font-weight:600;font-size:15px;margin-bottom:2px}
+.asst-body .rating{color:#202124;font-weight:600}
+.asst-body .reviews{color:#80868b;font-weight:400}
+.asst-body h3{font-size:15px;color:#202124;font-weight:600;margin:16px 0 8px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 10px}
+.cmp-table th,.cmp-table td{border:1px solid #e5e5e5;padding:7px 9px;text-align:left;vertical-align:top;line-height:1.45}
+.cmp-table th{background:#f7f7f8;color:#202124;font-weight:600}
+.cmp-table td:first-child{font-weight:600;color:#202124;background:#fafafa;white-space:nowrap}
+.typing-row{padding:8px 8%;display:none}
+.hidden-round{display:none}
+.input-area{padding:10px 8% 16px;border-top:1px solid #f1f3f4}
+.input-box{background:#f4f4f4;border:1px solid #e0e0e0;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.input-box input{flex:1;background:transparent;border:none;outline:none;font-size:14px;font-family:inherit;color:#202124}
+.input-box input::placeholder{color:#aaa}
+.send-btn{background:#d0d0d0;border:none;border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;font-size:15px}
+.disclaimer{text-align:center;font-size:11px;color:#aaa;margin-top:6px}
+.no-click{pointer-events:none;user-select:none}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease forwards}
+
+/* Embedded reasoning box (visible "thinking" panel) */
+.think-box{border:1px solid #e6e6e8;background:#fafafa;border-radius:12px;overflow:hidden}
+.think-box-head{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;user-select:none;transition:background .12s}
+.think-box-head:hover{background:#f1f1f3}
+.think-box-head .th-spin{width:14px;height:14px;border-radius:50%;border:2px solid #c7c7c7;border-top-color:#7a7a7a;display:inline-block;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.think-box-head .th-check{width:15px;height:15px;flex-shrink:0;color:#9aa0a6;display:none}
+.think-box-head .th-title{flex:1;font-size:13px;font-weight:600;color:#6b7177}
+.think-box-head .th-chevron{font-size:12px;color:#b0b4b8;transition:transform .2s}
+.th-hint-show{display:none;font-size:11.5px;color:#9aa0a6;font-weight:500}
+.think-box.done.collapsed .th-hint-show{display:inline}
+.think-box.collapsed .th-chevron{transform:rotate(-90deg)}
+.think-box.collapsed .think-box-body{display:none}
+.think-box-body{padding:2px 14px 13px;border-top:1px solid #efeff1}
+.th-status{font-size:13.5px;font-weight:500;line-height:1.6;margin:9px 0 4px;min-height:20px}
+.th-scroll{margin-top:2px;transition:max-height .25s ease}
+.think-line{display:inline-block;
+  background:linear-gradient(90deg,#bdbdbd 25%,#2b2b2b 50%,#bdbdbd 75%);
+  background-size:200% 100%;-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:shimmer 1.9s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.th-block{margin-top:11px;display:none}
+.th-block.show{display:block}
+.th-block li{display:none}
+.th-block li.in{display:list-item;animation:wordIn .35s ease forwards}
+.th-block .th-q{display:none}
+.th-block .th-q.in{display:inline-flex;animation:wordIn .35s ease forwards}
+.th-step{font-size:12.5px;font-weight:600;color:#9099a0;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.th-queries{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.th-q{font-size:12.5px;color:#5f6368;background:#fff;border:1px solid #ececee;border-radius:7px;padding:5px 9px;display:inline-flex;align-items:center;gap:6px;width:fit-content;max-width:100%}
+.th-q .mag{color:#a6abb0;font-size:11px}
+.th-sources{display:flex;flex-direction:column;gap:5px}
+.th-src{display:none;align-items:center;gap:8px;font-size:12.5px;color:#3c4043}
+.th-src.show{display:flex;animation:wordIn .35s ease forwards}
+.th-fav{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.th-src .dom{color:#9aa0a6;font-size:11px}
+.th-note{font-size:12.5px;color:#5f6368;line-height:1.5;margin-top:4px}
+.th-note.typing::after{content:"";display:inline-block;width:2px;height:1.02em;background:#b0b4b8;margin-left:1px;vertical-align:-2px;border-radius:1px;animation:caret .9s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.th-block ol,.th-block ul{padding-left:18px;margin:3px 0 0}
+.th-block li{font-size:12.5px;color:#5f6368;line-height:1.5;margin-bottom:5px}
+.th-block li strong{color:#3c4043;font-weight:600}
+/* While "rolling": compact fixed-height window that auto-scrolls through the trace */
+.think-box.rolling .th-scroll{max-height:248px;overflow:hidden;position:relative}
+.think-box.rolling .th-scroll::after{content:"";position:absolute;left:0;right:0;top:0;height:30px;background:linear-gradient(to bottom,#fafafa,rgba(250,250,250,0));pointer-events:none}
+/* Expanded after completion: no clipping, user sees everything */
+.think-box.done:not(.collapsed) .th-scroll{height:auto;max-height:none;overflow:visible}
+/* Comparison table stretches to fill the box, wraps cleanly, stays readable */
+.th-tablewrap{margin-top:5px;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;display:none}
+.th-tablewrap.in{display:block;animation:wordIn .4s ease forwards}
+.th-block .cmp-table{table-layout:fixed;width:100%;font-size:11px;margin:0}
+.th-block .cmp-table th,.th-block .cmp-table td{padding:4px 7px;white-space:normal;word-break:break-word;line-height:1.28;vertical-align:top}
+.th-block .cmp-table td:first-child,.th-block .cmp-table th:first-child{white-space:normal;width:19%}
+
+/* ===== Right-hand browsing pane (agent computer view) ===== */
+.layout.split .msg-row{padding:6px 5%}
+.layout.split .input-area{padding:10px 5% 16px}
+.layout.split #native-ad{padding:4px 5% 14px!important}
+.agent-pane{display:none;width:46%;min-width:380px;border-left:1px solid #e5e5e5;background:#f3f4f6;flex-direction:column;overflow:hidden}
+.agent-pane.open{display:flex}
+.ap-head{padding:9px 12px;border-bottom:1px solid #e5e5e5;background:#fff;display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#3c4043}
+.ap-head .ap-sub{font-weight:400;color:#9aa0a6;margin-left:auto;font-size:11.5px}
+.ap-dot{width:8px;height:8px;border-radius:50%;background:#0866ff;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0}
+.ap-dot.done{background:#188038;animation:none}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+.browser{margin:12px 12px 8px;border:1px solid #dcdcdc;border-radius:10px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0}
+.b-tabs{display:flex;align-items:flex-end;gap:6px;padding:6px 8px 0;background:#f1f3f4;border-bottom:1px solid #e0e0e0;min-height:34px}
+.b-tab{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e0e0e0;border-bottom:none;border-radius:8px 8px 0 0;padding:5px 10px;font-size:11.5px;color:#3c4043;max-width:190px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.b-tab .fv{width:14px;height:14px;border-radius:4px;color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.b-url{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #eee;background:#fff}
+.b-url .nav{color:#b0b4b8;font-size:13px;letter-spacing:2px}
+.b-url .addr{flex:1;background:#f1f3f4;border-radius:14px;padding:5px 11px;font-size:11.5px;color:#3c4043;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-url .addr .lock{color:#9aa0a6;margin-right:5px}
+.b-page{flex:1;overflow:auto;position:relative;background:#fff}
+.b-page .pg{animation:wordIn .3s ease}
+.ap-log{padding:0 12px 12px;font-size:11.5px;color:#5f6368;max-height:118px;overflow:hidden;flex-shrink:0}
+.ap-log .lg-row{display:flex;gap:8px;padding:2px 0;animation:wordIn .3s ease}
+.ap-log .t{color:#9aa0a6;font-variant-numeric:tabular-nums;width:34px;flex-shrink:0}
+.ap-log .ok{color:#188038}
+/* mock site pages */
+.site-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}
+.site-h .lg{width:22px;height:22px;border-radius:6px;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.site-h .nm{font-weight:700;font-size:13px;color:#202124}
+.site-h .nv{margin-left:auto;display:flex;gap:10px;font-size:11px;color:#9aa0a6}
+.site-search{margin:10px 14px;background:#f1f3f4;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#3c4043;display:flex;gap:6px;align-items:center}
+.site-search .mg{color:#9aa0a6}
+.site-count{font-size:11px;color:#9aa0a6;padding:0 14px 6px}
+.lst{padding:0 14px 14px}
+.lst-row{display:flex;gap:10px;padding:9px 8px;border:1px solid #f0f0f0;border-radius:8px;margin-bottom:7px;align-items:center;transition:background .3s,border-color .3s,opacity .3s}
+.lst-row.hl{background:#fff8e1;border-color:#f5c542}
+.lst-row.dim{opacity:.45}
+.lst-thumb{width:46px;height:46px;border-radius:6px;background:#e3e7ea;flex-shrink:0}
+.lst-body{flex:1;min-width:0}
+.lst-name{font-size:12.5px;font-weight:600;color:#202124}
+.lst-meta{font-size:11px;color:#5f6368;margin-top:1px}
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;background:#e6f4ea;color:#188038;font-weight:600;margin-left:4px;vertical-align:1px}
+.badge.gray{background:#f1f3f4;color:#5f6368}
+.badge.red{background:#fce8e6;color:#c5221f}
+.badge.amber{background:#fef7e0;color:#b06000}
+.detail{padding:14px}
+.detail h2{font-size:15px;margin-bottom:3px;color:#202124}
+.detail .sub{font-size:11.5px;color:#5f6368;margin-bottom:10px}
+.detail .hero{height:88px;border-radius:8px;background:linear-gradient(135deg,#dfe6ea,#c3cfd6);margin-bottom:10px}
+.detail p{font-size:11.5px;line-height:1.55;color:#4d5156;margin-bottom:8px}
+.detail .avail{border:1px solid #e0e0e0;border-radius:8px;padding:8px 10px;font-size:11.5px;display:flex;justify-content:space-between;align-items:center;background:#fafafa;color:#3c4043}
+.detail .avail b{color:#188038}
+.ap-done{padding:28px 14px;text-align:center;color:#5f6368;font-size:12.5px;line-height:1.6}
+.ap-done .big{font-size:26px;color:#188038;margin-bottom:6px}
+.skel{height:10px;border-radius:4px;background:linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s linear infinite;margin:7px 14px}
+.rv{padding:0 14px 14px}
+.rv-row{padding:8px 0;border-bottom:1px solid #f0f0f0}
+.rv-row .rn{font-size:12.5px;font-weight:600;color:#202124;display:flex;justify-content:space-between}
+.rv-row .rn .sc{color:#202124}
+.rv-row .rq{font-size:11px;color:#5f6368;margin-top:2px;font-style:italic}
+.prog{height:6px;border-radius:3px;background:#eee;overflow:hidden;margin:12px 14px}
+.prog i{display:block;height:100%;background:#202124;width:0;transition:width 1.4s ease}
+@media(max-width:760px){.body-area{flex-direction:column}.agent-pane.open{width:100%;min-width:0;height:44vh;border-left:none;border-top:1px solid #e5e5e5}}
+
+/* Agent action panel extras */
+.th-act{display:none;align-items:flex-start;gap:8px;font-size:12.5px;color:#3c4043;line-height:1.5}
+.th-act.in{display:flex;animation:wordIn .35s ease forwards}
+.th-act .act-ic{width:16px;height:16px;border-radius:4px;background:#e8eaed;color:#5f6368;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px}
+.th-act .act-ok{color:#188038;font-weight:600;font-size:11px;margin-left:4px}
+.th-src .act-ok{color:#188038;font-weight:600;font-size:11px}
+/* Result cards */
+.hcards{display:flex;flex-direction:column;gap:12px;margin:4px 0 12px}
+.hcard{border:1px solid #e3e3e5;border-radius:12px;background:#fff;overflow:hidden}
+.hcard-top{display:flex;gap:12px;padding:12px 12px 8px}
+.hcard-img{width:84px;height:84px;border-radius:8px;flex-shrink:0;object-fit:cover;background:#eef2f4;border:1px solid #eee}
+.hcard-head{flex:1;min-width:0}
+.hcard-name{font-size:15px;font-weight:600;color:#202124;line-height:1.3}
+.hcard-meta{font-size:12px;color:#5f6368;margin-top:2px}
+.hcard-meta .rt{color:#202124;font-weight:600}
+.hcard-desc{font-size:13px;line-height:1.6;color:#4d5156;padding:0 12px 10px}
+.hcard-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid #f1f3f4;background:#fafafa}
+.hcard-price{font-size:14px;font-weight:700;color:#202124}
+.hcard-price small{font-size:11.5px;font-weight:500;color:#5f6368;margin-left:4px}
+.hcard-book{background:#202124;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;pointer-events:auto}
+.hcard-book:hover{background:#000}
+.hcard-cancel{font-size:11.5px;color:#188038;font-weight:500}
+/* Confirmation sheet (mimics agent checkout confirm step) */
+.sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center}
+.sheet-bg.open{display:flex}
+.sheet{background:#fff;border-radius:16px;width:360px;max-width:92vw;padding:18px 18px 14px;box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:13px;color:#202124}
+.sheet h4{font-size:15px;font-weight:600;margin-bottom:10px}
+.sheet .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f3f4;color:#4d5156}
+.sheet .row b{color:#202124}
+.sheet .pay{display:flex;align-items:center;gap:8px;margin:12px 0 4px;font-size:12px;color:#5f6368}
+.sheet .pay .chip{background:#f1f3f4;border-radius:6px;padding:3px 8px;font-weight:600;color:#202124;font-size:11.5px}
+.sheet .btns{display:flex;gap:8px;margin-top:12px}
+.sheet .btns button{flex:1;border-radius:9px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #e0e0e0;background:#fff;color:#202124}
+.sheet .btns button.go{background:#202124;color:#fff;border-color:#202124}
+.sheet .fine{font-size:11px;color:#9aa0a6;margin-top:8px;text-align:center}
+
+/* smooth streaming reveal */
+.stream-word{opacity:0;animation:wordIn .26s ease forwards}
+.stream-fade{opacity:0;animation:wordIn .45s ease forwards}
+@keyframes wordIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="topbar no-click">
+    <span style="display:flex;align-items:center;gap:8px"><span class="m-logo">M</span><span style="font-size:14px;font-weight:700">Muse</span></span>
+    <div class="topbar-right"><button class="topbar-btn">Side chat</button><button class="topbar-btn">&#8943;</button></div>
+  </div>
+  <div class="body-area">
+    <div class="sidebar no-click">
+      <div class="sb-tab on"><span class="sb-ic">&#128172;</span>Chat</div>
+      <div class="sb-tab"><span class="sb-ic">&#9776;</span>Feed</div>
+      <div class="sb-tab"><span class="sb-ic">&#10024;</span>Ideas</div>
+      <div class="sb-tab"><span class="sb-ic">&#127919;</span>Goals</div>
+      <div class="sb-tab"><span class="sb-ic">&#128193;</span>Files</div>
+    </div>
+    <div class="chat-area">
+
+      <!-- HOME SCREEN (adopted from old design; no "GPT-5.4" tag) -->
+      <div class="home-screen" id="home-screen">
+        <img class="av" style="width:72px;height:72px" src="data:image/svg+xml;utf8,<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='%23e9dcc7'/><circle cx='14.5' cy='18' r='2.2' fill='%233a2f24'/><circle cx='25.5' cy='18' r='2.2' fill='%233a2f24'/><path d='M14 25.5q6 4.5 12 0' stroke='%233a2f24' stroke-width='2' fill='none' stroke-linecap='round'/></svg>" alt="Muse"/>
+        <div class="home-title">What should we do today?</div>
+        <div class="home-cta-wrap">
+          <div class="home-cta-label">Click below to get started</div>
+          <button class="home-start-btn" onclick="startConversation()">
+            Find and book me a hotel in downtown Austin
+            <span class="home-arrow">&#8250;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="messages" id="messages">
+
+        <!-- SINGLE COMBINED ROUND (adopted from new design) -->
+        <div class="msg-row no-click"><div class="user-wrap"><div class="user-bubble">I'm looking for a hotel near downtown Austin for my upcoming trip, 3 nights &mdash; can you find a couple of good options and handle the booking?</div></div></div>
+        <div class="msg-row" id="typing-1">
+          <div class="asst-head no-click"><img class="av" src="data:image/svg+xml;utf8,<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='%23e9dcc7'/><circle cx='14.5' cy='18' r='2.2' fill='%233a2f24'/><circle cx='25.5' cy='18' r='2.2' fill='%233a2f24'/><path d='M14 25.5q6 4.5 12 0' stroke='%233a2f24' stroke-width='2' fill='none' stroke-linecap='round'/></svg>" alt="Muse"/>Muse</div>
+          <div class="think-box" id="think-box">
+            <div class="think-box-head" id="think-head" onclick="toggleThink()">
+              <span class="th-spin" id="th-spin"></span>
+              <svg class="th-check" id="th-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="th-title" id="th-title">Searching booking sites&hellip;</span>
+              <span class="th-hint-show">Show details</span>
+              <span class="th-chevron" id="th-chevron">&#9662;</span>
+            </div>
+            <div class="think-box-body" id="think-body">
+              <div class="th-scroll" id="th-scroll">
+              <div class="th-trace" id="th-trace">
+
+                <div class="th-block" data-at="0">
+                  <div class="th-step">Searching</div>
+                  <div class="th-note">Looking for hotels near downtown Austin with 3-night availability.</div>
+                  <div class="th-queries">
+                    <div class="th-q"><span class="mag">&#128269;</span>&ldquo;hotels near downtown Austin &middot; 3 nights&rdquo;</div>
+                  </div>
+                </div>
+
+                <div class="th-block" data-at="0">
+                  <div class="th-step">Reading listings</div>
+                  <div class="th-note">Checking the top-rated listings on CityStay Guide.</div>
+                  <ul>
+                    <li data-hl="narden">Narden Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
+                    <li data-hl="talven">Talven Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
+                  </ul>
+                </div>
+
+                <div class="th-block" data-at="0">
+                  <div class="th-step">Ready to book</div>
+                  <div class="th-note">Two highly rated options within half a mile of downtown, both with free cancellation.</div>
+                </div>
+
+
+
+
+              </div>
+              </div><!-- /th-scroll -->
+              <div class="th-status" id="th-status"><span class="think-line">Working</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hidden-round" id="round-1">
+          <div class="msg-row fade-in no-click"><div class="asst-body">
+
+            <p>I found two strong options near downtown Austin with rooms available for your 3 nights. Both are highly rated and free to cancel up to two days before arrival.</p>
+
+            <div class="hcards">
+
+              <div class="hcard">
+                <div class="hcard-top">
+                  <img class="hcard-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 84 84'><rect width='84' height='84' fill='%235c7a8a'/><rect x='14' y='22' width='56' height='46' rx='3' fill='%23ffffff' opacity='.9'/><g fill='%235c7a8a'><rect x='20' y='28' width='9' height='9'/><rect x='37' y='28' width='9' height='9'/><rect x='54' y='28' width='9' height='9'/><rect x='20' y='42' width='9' height='9'/><rect x='37' y='42' width='9' height='9'/><rect x='54' y='42' width='9' height='9'/><rect x='36' y='54' width='12' height='14'/></g></svg>" alt="Narden Hotel"/>
+                  <div class="hcard-head">
+                    <div class="hcard-name">Narden Hotel</div>
+                    <div class="hcard-meta"><span class="rt">&#9733;4.8</span> (1,000+ reviews) &middot; 0.5 miles from downtown</div>
+                  </div>
+                </div>
+                <div class="hcard-desc">Modern hotel 0.5 miles from downtown, a short walk from the river trail and the Congress Avenue restaurants. Rooms are 300 sq ft with a queen bed, work desk, mini-fridge, and rainfall shower. Free Wi-Fi, on-site caf&eacute; serving breakfast until 11 AM, fitness center, rooftop terrace, and a 24-hour front desk. Check-in at 3 PM, check-out by 11 AM. Guests often mention the quiet rooms and friendly staff. Free cancellation up to two days before arrival.</div>
+                <div class="hcard-foot">
+                  <div><div class="hcard-price">$477 <small>for 3 nights, taxes and fees included</small></div></div>
+                </div>
+              </div>
+
+              <div class="hcard">
+                <div class="hcard-top">
+                  <img class="hcard-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 84 84'><rect width='84' height='84' fill='%231f6f8b'/><rect x='14' y='22' width='56' height='46' rx='3' fill='%23ffffff' opacity='.9'/><g fill='%231f6f8b'><rect x='20' y='28' width='9' height='9'/><rect x='37' y='28' width='9' height='9'/><rect x='54' y='28' width='9' height='9'/><rect x='20' y='42' width='9' height='9'/><rect x='37' y='42' width='9' height='9'/><rect x='54' y='42' width='9' height='9'/><rect x='36' y='54' width='12' height='14'/></g></svg>" alt="Talven Hotel"/>
+                  <div class="hcard-head">
+                    <div class="hcard-name">Talven Hotel</div>
+                    <div class="hcard-meta"><span class="rt">&#9733;4.8</span> (1,000+ reviews) &middot; 0.5 miles from downtown</div>
+                  </div>
+                </div>
+                <div class="hcard-desc">Contemporary hotel half a mile from downtown, an easy walk to the river trail and the restaurants on Congress Avenue. Each 300 sq ft room has a queen bed, work desk, mini-fridge, and rainfall shower. Free Wi-Fi, an on-site caf&eacute; with breakfast until 11 AM, a gym, rooftop terrace, and 24-hour front desk. Check-in from 3 PM, check-out by 11 AM. Guests frequently note the quiet rooms and friendly staff. Free cancellation up to two days before arrival.</div>
+                <div class="hcard-foot">
+                  <div><div class="hcard-price">$477 <small>for 3 nights, taxes and fees excluded</small></div></div>
+                </div>
+              </div>
+
+            </div>
+
+            <p>Let me know which one you'd like to book!</p>
+
+          </div></div>
+
+        <!-- NATIVE AD — revealed after the answer finishes streaming -->
+        <div id="native-ad" style="display:none;padding:4px 8% 14px">
+          <div style="border:1px solid #e0e0e0;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+
+            <!-- Header row: logo + brand + Sponsored + menu -->
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px 0">
+              <div style="width:26px;height:26px;border-radius:50%;background:#1f6f8b;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">T</div>
+              <div style="flex:1;min-width:0">
+                <span style="font-size:13px;font-weight:700;color:#202124">Talven Hotel</span>
+              </div>
+              <span style="font-size:10px;color:#d93025;font-weight:600;flex-shrink:0;margin-right:2px">Sponsored</span>
+              <span id="ad-menu-btn" onclick="toggleAdMenu(event)" style="font-size:16px;color:#bbb;padding:0 2px;flex-shrink:0;cursor:pointer;user-select:none;position:relative">&#8943;
+                <!-- Dropdown menu -->
+                <div id="ad-menu-dropdown" style="display:none;position:absolute;top:22px;right:0;width:170px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:999;padding:4px 0;font-size:12px;font-weight:400;color:#333">
+                  <div onclick="dismissAd('not_interested')" style="padding:7px 12px;cursor:pointer;transition:background .1s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">Not interested</div>
+                  <div onclick="dismissAd('not_relevant')" style="padding:7px 12px;cursor:pointer;transition:background .1s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">Not relevant to me</div>
+                  <div onclick="dismissAd('seen_too_often')" style="padding:7px 12px;cursor:pointer;transition:background .1s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">Seen this too often</div>
+                  <div onclick="dismissAd('covers_content')" style="padding:7px 12px;cursor:pointer;transition:background .1s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">Covers content</div>
+                  <div onclick="dismissAd('inappropriate')" style="padding:7px 12px;cursor:pointer;transition:background .1s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">Inappropriate</div>
+                  <div style="border-top:1px solid #eee;margin:2px 0"></div>
+                  <div onclick="dismissAd('report_ad')" style="padding:7px 12px;cursor:pointer;color:#c00;transition:background .1s" onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='transparent'">Report this ad</div>
+                </div>
+              </span>
+            </div>
+
+            <!-- Tagline -->
+            <div style="padding:4px 12px 8px;font-size:12px;color:#4d5156;line-height:1.45">Quiet rooms half a mile from downtown Austin &mdash; book your stay with free cancellation.</div>
+
+            <!-- Product card -->
+            <div style="margin:0 10px 10px;border:1px solid #eaeaea;border-radius:10px;background:#fafafa;display:flex;align-items:center;gap:10px;padding:8px 10px">
+                <img style="width:48px;height:48px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0;border:1px solid #f0f0f0" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='10' y='14' width='44' height='40' rx='3' fill='%231f6f8b'/><rect x='26' y='40' width='12' height='14' fill='%23ffffff'/><g fill='%23ffffff'><rect x='16' y='20' width='7' height='7'/><rect x='28' y='20' width='7' height='7'/><rect x='40' y='20' width='7' height='7'/><rect x='16' y='30' width='7' height='7'/><rect x='28' y='30' width='7' height='7'/><rect x='40' y='30' width='7' height='7'/></g><rect x='6' y='10' width='52' height='5' rx='2' fill='%23155a73'/></svg>" alt="Talven Hotel"/>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12.5px;line-height:1.3;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="font-weight:700;color:#202124">Talven Hotel</span><span style="font-size:11px;color:#5f6368;font-weight:400">&nbsp;&nbsp;&#9733;4.8 &middot; 0.5 mi from downtown</span></div>
+                  <div style="font-size:12.5px;font-weight:700;color:#202124">$477 / 3 nights</div>
+                </div>
+                <!-- Book Now button -->
+                <a href="javascript:void(0);" onclick="try{Qualtrics.SurveyEngine.setEmbeddedData('ShopNowClicked','1');}catch(e){} window.parent.postMessage({type:'shopNowClicked'},'*'); this.style.background='#155a73'; this.textContent='Redirecting...'; setTimeout(function(){try{document.getElementById('NextButton').click();}catch(e){}try{window.parent.document.getElementById('NextButton').click();}catch(e){}},300);" style="flex-shrink:0;padding:7px 14px;background:#1f6f8b;color:#fff;text-align:center;font-size:12.5px;font-weight:600;border-radius:7px;text-decoration:none;font-family:inherit;cursor:pointer;white-space:nowrap">Book Now</a>
+            </div>
+
+          </div>
+        </div>
+
+        </div>
+
+      </div><!-- /messages -->
+
+      <div class="input-area no-click" id="input-area" style="display:none">
+        <div class="input-box"><input type="text" placeholder="Message Muse" readonly/><button class="send-btn">&#8593;</button></div>
+        <div class="disclaimer">Muse can make mistakes. Check important info before you book.</div>
+      </div>
+    </div><!-- /chat-area -->
+
+    <!-- RIGHT: agent browsing pane -->
+    <div class="agent-pane no-click" id="agent-pane">
+      <div class="ap-head"><span class="av-wrap"><img class="av" src="data:image/svg+xml;utf8,<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='%23e9dcc7'/><circle cx='14.5' cy='18' r='2.2' fill='%233a2f24'/><circle cx='25.5' cy='18' r='2.2' fill='%233a2f24'/><path d='M14 25.5q6 4.5 12 0' stroke='%233a2f24' stroke-width='2' fill='none' stroke-linecap='round'/></svg>" alt="Muse"/><span class="lap" id="ap-lap">&#128187;</span></span><span class="ap-dot" id="ap-dot"></span><span id="ap-title">Muse is browsing</span><span class="ap-sub" id="ap-sub">Muse Secure VM &middot; working in the background</span></div>
+      <div class="browser">
+        <div class="b-tabs" id="b-tabs"></div>
+        <div class="b-url"><span class="nav">&#8249;&nbsp;&#8250;&nbsp;&#8635;</span><span class="addr" id="b-addr"><span class="lock">&#128274;</span>about:blank</span></div>
+        <div class="b-page" id="b-page"><div class="pg"><div class="skel" style="width:60%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:40%"></div></div></div>
+      </div>
+      <div class="ap-log" id="ap-log"></div>
+    </div>
+  </div><!-- /body-area -->
+</div><!-- /layout -->
+
+<script>
+function startConversation(){
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('messages').style.display='block';
+  var ia=document.getElementById('input-area');if(ia)ia.style.display='block';
+  var t=document.getElementById('typing-1');t.style.display='block';
+  document.getElementById('agent-pane').classList.add('open');
+  document.querySelector('.layout').classList.add('split');
+  paneStart();
+  runThinking();
+}
+
+/* Reasoning box: updates a live status line, progressively reveals trace
+   blocks (queries, sources, comparison table), then collapses to a
+   clickable "Thought for 30s" header that keeps the trace visible. */
+function runThinking(){
+  var t0=Date.now();
+  var box=document.getElementById('think-box');
+  if(box)box.classList.add('rolling');
+  var sc=document.getElementById('th-scroll');
+  var cur=null;   // block currently being written
+  function roll(){
+    if(sc){
+      if(cur && cur.offsetHeight > sc.clientHeight){
+        sc.scrollTop=Math.max(0,cur.offsetTop-4);   // tall block: keep its intro text in view
+      } else {
+        sc.scrollTop=sc.scrollHeight;               // otherwise keep the newest line at the bottom
+      }
+    }
+    scr();
+  }
+  var line=document.getElementById('th-status');
+  function set(t){line.innerHTML='<span class="think-line">'+t+'</span>';roll();}
+
+  /* Consistent pacing — tuned so the whole reasoning lasts ~30s */
+  var CHAR=13;    // ms per character while typing (smooth, like real streaming)
+  var ITEM=250;   // ms between revealed sub-items (constant)
+  var PAUSE=300;  // ms between blocks (light condition)
+
+  /* Status line shown while each block is being written */
+  var statuses=[
+    'Searching CityStay Guide',
+    'Reading the top listings',
+    'Preparing options you can book'
+  ];
+
+  function typeNote(el,done){
+    var full=el.getAttribute('data-full');
+    if(full===null){full=el.textContent;el.setAttribute('data-full',full);}
+    el.textContent='';
+    el.classList.add('typing');
+    var i=0;
+    (function step(){
+      if(i>=full.length){el.classList.remove('typing');if(done)done();return;}
+      var ch=full.charAt(i++);
+      el.textContent=full.slice(0,i);
+      roll();
+      var d=CHAR;                                   // smooth base cadence
+      if(ch===',' || ch===';') d+=140;              // small breath at clauses
+      else if(ch==='.' || ch==='?' || ch==='!' || ch===':') d+=260; // longer at sentence ends
+      else if(ch===' ') d+=8;
+      setTimeout(step,d);
+    })();
+  }
+
+  /* Reveal one sub-item at a time at a constant interval */
+  function revealItems(items,idx,done){
+    if(idx>=items.length){if(done)done();return;}
+    items[idx].classList.add('in');
+    items[idx].classList.add('show');
+    var ds=items[idx].getAttribute('data-site');if(ds)paneSite(ds);
+    var dh=items[idx].getAttribute('data-hotel');if(dh)paneDetail(dh);
+    var dl=items[idx].getAttribute('data-hl');if(dl)paneHighlight(dl);
+    roll();
+    var slow=items[idx].getAttribute('data-site')||items[idx].getAttribute('data-hotel')||items[idx].getAttribute('data-hl');
+    setTimeout(function(){revealItems(items,idx+1,done);},slow?1100:ITEM);
+  }
+
+  var blocks=Array.prototype.slice.call(document.querySelectorAll('#th-trace .th-block'));
+
+  /* Process blocks strictly one after another: finish one, then the next */
+  function doBlock(n){
+    if(n>=blocks.length){finish();return;}
+    var b=blocks[n];
+    cur=b;
+    paneStage(n);
+    if(statuses[n])set(statuses[n]);
+    b.classList.add('show');
+    var note=b.querySelector('.th-note');
+    function afterNote(){
+      var items=Array.prototype.slice.call(b.querySelectorAll('.th-q, ol > li, ul > li, .th-src'));
+      revealItems(items,0,function(){
+        var tbl=b.querySelector('.th-tablewrap');
+        if(tbl){
+          tbl.classList.add('in');
+          // enlarge the window so the whole stage (intro text + table) is visible
+          if(sc)sc.style.maxHeight=Math.min(480,b.scrollHeight+16)+'px';
+          setTimeout(function(){
+            if(sc)sc.scrollTop=Math.max(0,b.offsetTop-4);  // keep the intro text at the top
+            scr();
+          },60);
+          setTimeout(function(){next(n);},600);
+        }
+        else{next(n);}
+      });
+    }
+    if(note){typeNote(note,afterNote);}else{afterNote();}
+  }
+  function next(n){setTimeout(function(){doBlock(n+1);},PAUSE);}
+
+  function finish(){
+    paneDone();
+    setTimeout(function(){
+      collapseThinking(Math.round((Date.now()-t0)/1000));   // real elapsed time
+      document.getElementById('round-1').style.display='block';
+      scr();
+      streamAnswer(function(){
+        setTimeout(function(){var ad=document.getElementById('native-ad');if(ad)ad.style.display='block';scr();},500);
+      });
+    },400);   // light condition: brief pause before the results
+  }
+
+  set('Working');
+  setTimeout(function(){doBlock(0);},250);
+}
+
+/* Finish the reasoning box: stop rolling, swap spinner for a check, set
+   the summary title, and collapse it (still expandable to see everything). */
+function collapseThinking(seconds){
+  var spin=document.getElementById('th-spin');if(spin)spin.style.display='none';
+  var chk=document.getElementById('th-check');if(chk)chk.style.display='inline-block';
+  var title=document.getElementById('th-title');if(title)title.textContent='Searched 1 site in '+seconds+'s';
+  var status=document.getElementById('th-status');if(status)status.style.display='none';
+  var sc=document.getElementById('th-scroll');if(sc)sc.style.maxHeight='';
+  var box=document.getElementById('think-box');
+  if(box){box.classList.remove('rolling');box.classList.add('done');box.classList.add('collapsed');}
+  /* Default: participant has NOT expanded the finished thinking box */
+  try{
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming','never');
+  }catch(e){}
+  try{window.parent.postMessage({type:'thinkBoxExpanded',value:'0'},'*');}catch(e){}
+}
+
+/* --- Think box engagement tracking state --- */
+var tbOpenStart=null;    // timestamp when the finished box was last expanded (null = closed)
+var tbOpenTotal=0;       // accumulated open time in ms across expand/collapse cycles
+var tbToggleCount=0;     // number of times participant expanded the finished box
+var tbTimingSet=false;   // first-expansion timing recorded?
+
+/* Write current total open seconds to embedded data */
+function tbWriteTime(){
+  var total=tbOpenTotal+(tbOpenStart?(Date.now()-tbOpenStart):0);
+  var secs=String(Math.round(total/1000));
+  try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime',secs);}catch(e){}
+  try{window.parent.postMessage({type:'thinkBoxExpandTime',value:secs},'*');}catch(e){}
+}
+/* While the box is open, keep the saved value fresh every 2s so the time
+   is captured even if the participant advances with the box still open */
+setInterval(function(){if(tbOpenStart)tbWriteTime();},2000);
+
+/* Expand / collapse the reasoning box from its header */
+function toggleThink(){
+  var box=document.getElementById('think-box');
+  if(box){
+    var isDone=box.classList.contains('done');
+    var expanding=isDone && box.classList.contains('collapsed');
+    box.classList.toggle('collapsed');
+    if(expanding){
+      /* Participant clicked to unfold the thinking process after thinking finished */
+      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','1');}catch(e){}
+      try{window.parent.postMessage({type:'thinkBoxExpanded',value:'1'},'*');}catch(e){}
+      /* Count this expansion */
+      tbToggleCount++;
+      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount',String(tbToggleCount));}catch(e){}
+      try{window.parent.postMessage({type:'thinkBoxToggleCount',value:String(tbToggleCount)},'*');}catch(e){}
+      /* First expansion only: was the ad already on screen? */
+      if(!tbTimingSet){
+        tbTimingSet=true;
+        var ad=document.getElementById('native-ad');
+        var timing=(ad && ad.style.display==='block')?'after_ad':'before_ad';
+        try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming',timing);}catch(e){}
+        try{window.parent.postMessage({type:'thinkBoxExpandTiming',value:timing},'*');}catch(e){}
+      }
+      /* Start the open-time clock */
+      tbOpenStart=Date.now();
+    } else if(isDone && tbOpenStart){
+      /* Participant collapsed the box: bank the elapsed time */
+      tbOpenTotal+=Date.now()-tbOpenStart;
+      tbOpenStart=null;
+      tbWriteTime();
+    }
+  }
+  scr();
+}
+
+/* Smooth streaming: words fade in; table fades in as a whole block */
+function streamAnswer(done){
+  var body=document.querySelector('#round-1 .asst-body');
+  if(!body){if(done)done();return;}
+  var tmp=document.createElement('div');
+  tmp.innerHTML=body.innerHTML;
+  body.innerHTML='';
+
+  var ops=[];
+  (function walk(node){
+    Array.prototype.forEach.call(node.childNodes,function(n){
+      if(n.nodeType===3){
+        var parts=n.nodeValue.split(/(\s+)/);
+        for(var k=0;k<parts.length;k++){if(parts[k].length)ops.push({t:'text',v:parts[k]});}
+      } else if(n.nodeType===1){
+        if(n.tagName==='TABLE'){
+          ops.push({t:'block',el:n});
+        } else {
+          ops.push({t:'open',el:n});
+          walk(n);
+          ops.push({t:'close'});
+        }
+      }
+    });
+  })(tmp);
+
+  var stack=[body];
+  function top(){return stack[stack.length-1];}
+  var i=0;
+  function step(){
+    if(i>=ops.length){if(done)done();return;}
+    var op=ops[i++];
+    if(op.t==='open'){
+      var el=document.createElement(op.el.tagName);
+      Array.prototype.forEach.call(op.el.attributes,function(a){el.setAttribute(a.name,a.value);});
+      top().appendChild(el);stack.push(el);step();
+    } else if(op.t==='close'){
+      stack.pop();step();
+    } else if(op.t==='block'){
+      var clone=op.el.cloneNode(true);
+      clone.className=(clone.className?clone.className+' ':'')+'stream-fade';
+      top().appendChild(clone);scr();
+      setTimeout(step,180);
+    } else {
+      if(/\S/.test(op.v)){
+        var s=document.createElement('span');
+        s.className='stream-word';
+        s.textContent=op.v;
+        top().appendChild(s);scr();
+        setTimeout(step,14+Math.random()*22);
+      } else {
+        top().appendChild(document.createTextNode(op.v));step();
+      }
+    }
+  }
+  step();
+}
+
+function scr(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})},100)}
+
+/* ===== Browsing pane engine: mock pages built in HTML, driven by the action steps ===== */
+var SITES={
+  citystay:{name:'CityStay Guide',color:'#5b6470',letter:'C',host:'citystayguide.com',path:'/austin/hotels?near=downtown&nights=3'},
+  hotelbench:{name:'HotelBench',color:'#0fa36b',letter:'H',host:'hotelbench.com',path:'/compare/austin-downtown'},
+  travelreviews:{name:'Travel Reviews',color:'#2c7be8',letter:'T',host:'travelreviews.com',path:'/austin/downtown-hotels/ratings'},
+  stayscout:{name:'StayScout',color:'#e8612c',letter:'S',host:'stayscout.com',path:'/search?city=austin&area=downtown&nights=3'}
+};
+var HOTELS=[
+  {k:'narden',n:'Narden Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
+  {k:'corvel',n:'Corvel Inn',r:'4.1',rv:'640',d:'1.4 mi from downtown',c:'Free cancellation',a:'Available',far:true,q:'Fine for the price, a bit far out'},
+  {k:'talven',n:'Talven Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
+  {k:'brisa',n:'Brisa Suites',r:'4.3',rv:'820',d:'0.8 mi from downtown',c:'Non-refundable',a:'Available',q:'Nice pool, early breakfast cutoff'},
+  {k:'lumen',n:'Lumen House',r:'4.2',rv:'510',d:'0.6 mi from downtown',c:'7-day notice',a:'Sold out',q:'Great rooftop bar, Wi-Fi costs extra'}
+];
+var paneT0=0,paneTab=null;
+function hb(h){return HOTELS.filter(function(x){return x.k===h;})[0];}
+function siteHead(s){var S=SITES[s];return '<div class="site-h"><span class="lg" style="background:'+S.color+'">'+S.letter+'</span><span class="nm">'+S.name+'</span><span class="nv"><span>Hotels</span><span>Deals</span><span>Sign in</span></span></div>';}
+function listRows(opts){
+  opts=opts||{};
+  return HOTELS.map(function(h){
+    var cls='lst-row'+(opts.hl===h.k?' hl':'')+(opts.dim&&opts.dim.indexOf(h.k)>-1?' dim':'');
+    var meta='&#9733;'+h.r+' ('+h.rv+') &middot; '+h.d;
+    var badge='';
+    if(opts.mode==='avail'){badge=(h.a==='Available')?'<span class="badge">3 nights available</span>':'<span class="badge red">Sold out</span>';}
+    else if(opts.mode==='cancel'){badge=(h.c==='Free cancellation')?'<span class="badge">Free cancellation</span>':(h.c==='Non-refundable'?'<span class="badge red">Non-refundable</span>':'<span class="badge amber">'+h.c+'</span>');}
+    else{badge=(h.c==='Free cancellation')?'<span class="badge gray">Free cancellation</span>':'';}
+    return '<div class="'+cls+'" data-k="'+h.k+'"><div class="lst-thumb"></div><div class="lst-body"><div class="lst-name">'+h.n+'</div><div class="lst-meta">'+meta+' '+badge+'</div></div></div>';
+  }).join('');
+}
+function pageFor(s){
+  var S=SITES[s];
+  if(s==='citystay')return siteHead(s)+'<div class="site-search"><span class="mg">&#128269;</span>hotels near downtown Austin &middot; 3 nights</div><div class="site-count">14 hotels near downtown &middot; sorted by guest rating</div><div class="lst">'+listRows({})+'</div>';
+  if(s==='hotelbench')return siteHead(s)+'<div class="site-search"><span class="mg">&#9878;</span>Compare: Austin &middot; Downtown &middot; walkable</div><div class="site-count">9 listings within 1.5 miles</div><div class="lst">'+listRows({mode:'cancel'})+'</div>';
+  if(s==='travelreviews')return siteHead(s)+'<div class="site-search"><span class="mg">&#9733;</span>Guest ratings &middot; downtown Austin</div><div class="rv">'+HOTELS.map(function(h){return '<div class="rv-row"><div class="rn"><span>'+h.n+'</span><span class="sc">&#9733;'+h.r+' <span style="color:#9aa0a6;font-weight:400">('+h.rv+')</span></span></div><div class="rq">&ldquo;'+h.q+'&rdquo;</div></div>';}).join('')+'</div>';
+  if(s==='stayscout')return siteHead(s)+'<div class="site-search"><span class="mg">&#128197;</span>3 nights &middot; 1 room &middot; downtown Austin</div><div class="site-count">Availability for your dates</div><div class="lst">'+listRows({mode:'avail'})+'</div>';
+  return '';
+}
+function detailPage(k){
+  var h=hb(k);
+  var desc={narden:'Modern hotel 0.5 miles from downtown, a short walk from the river trail and Congress Avenue. 300 sq ft rooms with queen bed, work desk, mini-fridge and rainfall shower. Free Wi-Fi, caf&eacute; with breakfast until 11 AM, fitness center, rooftop terrace, 24-hour front desk.',
+            talven:'Contemporary hotel half a mile from downtown, an easy walk to the river trail and Congress Avenue. 300 sq ft rooms with queen bed, work desk, mini-fridge and rainfall shower. Free Wi-Fi, caf&eacute; with breakfast until 11 AM, gym, rooftop terrace, 24-hour front desk.',
+            brisa:'280 sq ft rooms with queen bed and mini-fridge. Free Wi-Fi, breakfast until 9 AM, fitness room, outdoor pool.',
+            lumen:'290 sq ft rooms with queen bed and work desk. Paid Wi-Fi, caf&eacute; next door, rooftop bar.',
+            corvel:'260 sq ft rooms with queen bed and desk. Free Wi-Fi, lobby coffee bar, small gym.'}[k];
+  var avail;
+  if(h.a!=='Available')avail='<span>3 nights &middot; 1 queen room</span><span class="badge red">Sold out</span>';
+  else if(h.c==='Non-refundable')avail='<span>3 nights &middot; 1 queen room</span><span class="badge red">Non-refundable only</span>';
+  else if(h.c!=='Free cancellation')avail='<span>3 nights &middot; 1 queen room</span><span class="badge amber">'+h.c+'</span>';
+  else if(h.far)avail='<span>3 nights &middot; 1 queen room</span><span class="badge amber">Available &middot; 1.4 mi from downtown</span>';
+  else avail='<span>3 nights &middot; 1 queen room</span><b>&#10003; Available &middot; Free cancellation</b>';
+  return siteHead('stayscout')+'<div class="detail"><div class="hero"></div><h2>'+h.n+'</h2><div class="sub">&#9733;'+h.r+' ('+h.rv+' reviews) &middot; '+h.d+' &middot; Check-in 3 PM &middot; Check-out 11 AM</div><p>'+desc+'</p><div class="avail">'+avail+'</div></div>';
+}
+function paneLog(msg,ok){
+  var l=document.getElementById('ap-log');if(!l)return;
+  var s=((Date.now()-paneT0)/1000).toFixed(1)+'s';
+  var r=document.createElement('div');r.className='lg-row';
+  r.innerHTML='<span class="t">'+s+'</span><span'+(ok?' class="ok"':'')+'>'+msg+'</span>';
+  l.appendChild(r);
+  while(l.children.length>5)l.removeChild(l.firstChild);
+}
+function paneTabTo(s){
+  var tabs=document.getElementById('b-tabs');if(!tabs)return;
+  var S=SITES[s];
+  if(!document.getElementById('tab-'+s)){
+    var t=document.createElement('div');t.className='b-tab';t.id='tab-'+s;
+    t.innerHTML='<span class="fv" style="background:'+S.color+'">'+S.letter+'</span>'+S.name;
+    tabs.appendChild(t);
+  }
+  Array.prototype.forEach.call(tabs.children,function(c){c.style.background=(c.id==='tab-'+s)?'#fff':'#e8eaed';c.style.color=(c.id==='tab-'+s)?'#202124':'#80868b';});
+  paneTab=s;
+}
+function paneNav(s,path,html){
+  paneTabTo(s);
+  var S=SITES[s];
+  document.getElementById('b-addr').innerHTML='<span class="lock">&#128274;</span>'+S.host+(path||S.path);
+  var p=document.getElementById('b-page');
+  p.innerHTML='<div class="pg"><div class="skel" style="width:55%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:40%"></div></div>';
+  setTimeout(function(){p.innerHTML='<div class="pg">'+html+'</div>';p.scrollTop=0;},420);
+}
+function paneStart(){
+  paneT0=Date.now();
+  paneLog('Opening browser');
+}
+function paneStage(n){
+  if(n===0){paneNav('citystay',null,pageFor('citystay'));paneLog('Searching CityStay Guide for hotels near downtown Austin');}
+  if(n===2){document.getElementById('ap-sub').textContent='Checking each listing';}
+  if(n===3){document.getElementById('ap-sub').textContent='Preparing results';}
+}
+function paneSite(s){
+  paneNav(s,null,pageFor(s));
+  paneLog('Reading '+SITES[s].name);
+}
+function paneDetail(k){
+  var h=hb(k);
+  paneNav('stayscout','/hotel/'+k+'?nights=3',detailPage(k));
+  var ok=(h.a==='Available'&&h.c==='Free cancellation'&&!h.far);
+  paneLog(h.n+': '+(ok?'3 nights available, free cancellation':(h.a!=='Available'?'no rooms for these dates':h.c==='Non-refundable'?'non-refundable only':h.far?'1.4 miles from downtown, dropped':'dropped')),ok);
+}
+function paneHighlight(k){
+  var h=hb(k);
+  var row=document.querySelector('#b-page .lst-row[data-k="'+k+'"]');
+  if(row){row.classList.remove('dim');row.classList.add('hl');row.scrollIntoView({block:'nearest'});}
+  Array.prototype.forEach.call(document.querySelectorAll('#b-page .lst-row'),function(r){if(!r.classList.contains('hl'))r.classList.add('dim');});
+  paneLog(h.n+': 3 nights available, free cancellation',true);
+}
+function paneDone(){
+  var dot=document.getElementById('ap-dot');if(dot)dot.classList.add('done');
+  document.getElementById('ap-title').textContent='Browsing complete';
+  var lap=document.getElementById('ap-lap');if(lap)lap.style.display='none';
+  document.getElementById('ap-sub').textContent='1 site \u00b7 2 options ready';
+  var p=document.getElementById('b-page');
+  p.innerHTML='<div class="pg"><div class="ap-done"><div class="big">&#10003;</div>Checked CityStay Guide.<br/>2 options match your request and are ready to book.</div></div>';
+  paneLog('Done \u2014 2 options ready to book',true);
+}
+
+
+/* Ad Menu Functions */
+function toggleAdMenu(e){
+  e.stopPropagation();
+  var menu=document.getElementById('ad-menu-dropdown');
+  if(!menu)return;
+  menu.style.display=(menu.style.display==='none')?'block':'none';
+}
+
+function dismissAd(reason){
+  try{
+    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissed','1');
+    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissReason',reason);
+  }catch(e){}
+  try{
+    window.parent.postMessage({type:'adDismissed',reason:reason},'*');
+  }catch(e){}
+  document.getElementById('ad-menu-dropdown').style.display='none';
+  var adContainer=document.getElementById('native-ad');
+  var reasonLabels={
+    'not_interested':'Not interested',
+    'not_relevant':'Not relevant to me',
+    'seen_too_often':'Seen this too often',
+    'covers_content':'Covers content',
+    'inappropriate':'Inappropriate',
+    'report_ad':'Reported'
+  };
+  var label=reasonLabels[reason]||reason;
+  adContainer.innerHTML='<div style="border:1px solid #e8e8e8;border-radius:14px;background:#fafafa;padding:24px 20px;text-align:center">'
+    +'<div style="font-size:14px;color:#70757a;margin-bottom:4px">Ad removed</div>'
+    +'<div style="font-size:12px;color:#9ca3af">Reason: '+label+'</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:8px">We\'ll try to show more relevant content.</div>'
+    +'</div>';
+}
+
+document.addEventListener('click',function(e){
+  var menu=document.getElementById('ad-menu-dropdown');
+  if(menu && menu.style.display==='block'){
+    menu.style.display='none';
+  }
+});
+</script>
+</body>
+</html>
