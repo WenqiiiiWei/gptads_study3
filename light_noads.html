@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ChatGPT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#fff;color:#202124}
+.layout{display:flex;width:100%;height:100vh;flex-direction:column}
+.topbar{padding:7px 12px;border-bottom:1px solid #e5e5e5;font-size:14px;font-weight:600;color:#202124;display:flex;align-items:center;justify-content:space-between}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{background:none;border:1px solid #e0e0e0;border-radius:8px;padding:4px 10px;font-size:12px;color:#555;cursor:pointer}
+.body-area{display:flex;flex:1;overflow:hidden}
+.sidebar{width:44px;min-width:44px;background:#f9f9f9;border-right:1px solid #e5e5e5;padding:6px 4px;display:flex;flex-direction:column;align-items:center}
+.sb-top{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:4px}
+.sb-btn{background:transparent;border:none;color:#888;padding:4px;border-radius:6px;font-size:15px}
+.sb-new{display:flex;align-items:center;justify-content:center;padding:6px;border-radius:8px;color:#555;font-size:15px}
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* HOME SCREEN (adopted from old design) */
+.home-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:20px}
+.home-title{font-size:22px;font-weight:600;color:#202124}
+.home-cta-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.home-cta-label{font-size:12px;color:#9ca3af;letter-spacing:.3px}
+.home-start-btn{background:#f4f4f5;color:#374151;border:1px solid #e4e4e7;border-radius:12px;padding:13px 20px;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s,border-color .15s;max-width:430px;width:100%;line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.home-start-btn:hover{background:#ebebec;border-color:#d1d5db}
+.home-arrow{color:#9ca3af;font-size:18px;flex-shrink:0}
+
+.messages{flex:1;overflow-y:auto;padding:16px 0 8px;display:none}
+.msg-row{padding:6px 8%}
+.divider{margin:4px 8%;border:none;border-top:1px dashed #e5e5e5}
+.user-wrap{display:flex;justify-content:flex-end}
+.user-bubble{background:#f0f0f0;border-radius:18px 18px 4px 18px;padding:10px 14px;max-width:75%;font-size:14px;line-height:1.6}
+.asst-body{font-size:14px;line-height:1.7;color:#4d5156}
+.asst-body p{margin-bottom:14px}
+.asst-body ol,.asst-body ul{padding-left:20px;margin-bottom:10px}
+.asst-body li{margin-bottom:6px}
+.asst-body strong{color:#202124;font-weight:600}
+.asst-body .hotel-name{display:block;color:#202124;font-weight:600;font-size:15px;margin-bottom:2px}
+.asst-body .rating{color:#202124;font-weight:600}
+.asst-body .reviews{color:#80868b;font-weight:400}
+.asst-body h3{font-size:15px;color:#202124;font-weight:600;margin:16px 0 8px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 10px}
+.cmp-table th,.cmp-table td{border:1px solid #e5e5e5;padding:7px 9px;text-align:left;vertical-align:top;line-height:1.45}
+.cmp-table th{background:#f7f7f8;color:#202124;font-weight:600}
+.cmp-table td:first-child{font-weight:600;color:#202124;background:#fafafa;white-space:nowrap}
+.typing-row{padding:8px 8%;display:none}
+.hidden-round{display:none}
+.input-area{padding:10px 8% 16px;border-top:1px solid #f1f3f4}
+.input-box{background:#f4f4f4;border:1px solid #e0e0e0;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.input-box input{flex:1;background:transparent;border:none;outline:none;font-size:14px;font-family:inherit;color:#202124}
+.input-box input::placeholder{color:#aaa}
+.send-btn{background:#d0d0d0;border:none;border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;font-size:15px}
+.disclaimer{text-align:center;font-size:11px;color:#aaa;margin-top:6px}
+.no-click{pointer-events:none;user-select:none}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease forwards}
+
+/* Embedded reasoning box (visible "thinking" panel) */
+.think-box{border:1px solid #e6e6e8;background:#fafafa;border-radius:12px;overflow:hidden}
+.think-box-head{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;user-select:none;transition:background .12s}
+.think-box-head:hover{background:#f1f1f3}
+.think-box-head .th-spin{width:14px;height:14px;border-radius:50%;border:2px solid #c7c7c7;border-top-color:#7a7a7a;display:inline-block;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.think-box-head .th-check{width:15px;height:15px;flex-shrink:0;color:#9aa0a6;display:none}
+.think-box-head .th-title{flex:1;font-size:13px;font-weight:600;color:#6b7177}
+.think-box-head .th-chevron{font-size:12px;color:#b0b4b8;transition:transform .2s}
+.th-hint-show{display:none;font-size:11.5px;color:#9aa0a6;font-weight:500}
+.think-box.done.collapsed .th-hint-show{display:inline}
+.think-box.collapsed .th-chevron{transform:rotate(-90deg)}
+.think-box.collapsed .think-box-body{display:none}
+.think-box-body{padding:2px 14px 13px;border-top:1px solid #efeff1}
+.th-status{font-size:13.5px;font-weight:500;line-height:1.6;margin:9px 0 4px;min-height:20px}
+.th-scroll{margin-top:2px;transition:max-height .25s ease}
+.think-line{display:inline-block;
+  background:linear-gradient(90deg,#bdbdbd 25%,#2b2b2b 50%,#bdbdbd 75%);
+  background-size:200% 100%;-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:shimmer 1.9s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.th-block{margin-top:11px;display:none}
+.th-block.show{display:block}
+.th-block li{display:none}
+.th-block li.in{display:list-item;animation:wordIn .35s ease forwards}
+.th-block .th-q{display:none}
+.th-block .th-q.in{display:inline-flex;animation:wordIn .35s ease forwards}
+.th-step{font-size:12.5px;font-weight:600;color:#9099a0;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.th-queries{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.th-q{font-size:12.5px;color:#5f6368;background:#fff;border:1px solid #ececee;border-radius:7px;padding:5px 9px;display:inline-flex;align-items:center;gap:6px;width:fit-content;max-width:100%}
+.th-q .mag{color:#a6abb0;font-size:11px}
+.th-sources{display:flex;flex-direction:column;gap:5px}
+.th-src{display:none;align-items:center;gap:8px;font-size:12.5px;color:#3c4043}
+.th-src.show{display:flex;animation:wordIn .35s ease forwards}
+.th-fav{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.th-src .dom{color:#9aa0a6;font-size:11px}
+.th-note{font-size:12.5px;color:#5f6368;line-height:1.5;margin-top:4px}
+.th-note.typing::after{content:"";display:inline-block;width:2px;height:1.02em;background:#b0b4b8;margin-left:1px;vertical-align:-2px;border-radius:1px;animation:caret .9s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.th-block ol,.th-block ul{padding-left:18px;margin:3px 0 0}
+.th-block li{font-size:12.5px;color:#5f6368;line-height:1.5;margin-bottom:5px}
+.th-block li strong{color:#3c4043;font-weight:600}
+/* While "rolling": compact fixed-height window that auto-scrolls through the trace */
+.think-box.rolling .th-scroll{max-height:248px;overflow:hidden;position:relative}
+.think-box.rolling .th-scroll::after{content:"";position:absolute;left:0;right:0;top:0;height:30px;background:linear-gradient(to bottom,#fafafa,rgba(250,250,250,0));pointer-events:none}
+/* Expanded after completion: no clipping, user sees everything */
+.think-box.done:not(.collapsed) .th-scroll{height:auto;max-height:none;overflow:visible}
+/* Comparison table stretches to fill the box, wraps cleanly, stays readable */
+.th-tablewrap{margin-top:5px;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;display:none}
+.th-tablewrap.in{display:block;animation:wordIn .4s ease forwards}
+.th-block .cmp-table{table-layout:fixed;width:100%;font-size:11px;margin:0}
+.th-block .cmp-table th,.th-block .cmp-table td{padding:4px 7px;white-space:normal;word-break:break-word;line-height:1.28;vertical-align:top}
+.th-block .cmp-table td:first-child,.th-block .cmp-table th:first-child{white-space:normal;width:19%}
+
+/* smooth streaming reveal */
+.stream-word{opacity:0;animation:wordIn .26s ease forwards}
+.stream-fade{opacity:0;animation:wordIn .45s ease forwards}
+@keyframes wordIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="topbar no-click">
+    <span style="font-size:14px;font-weight:600">ChatGPT</span>
+    <div class="topbar-right"><button class="topbar-btn">Share</button><button class="topbar-btn">&#8943;</button></div>
+  </div>
+  <div class="body-area">
+    <div class="sidebar no-click">
+      <div class="sb-top"><button class="sb-btn">&#9776;</button><button class="sb-btn">&#9998;</button></div>
+      <div class="sb-new">&#9998;</div>
+    </div>
+    <div class="chat-area">
+
+      <!-- HOME SCREEN (adopted from old design; no "GPT-5.4" tag) -->
+      <div class="home-screen" id="home-screen">
+        <div class="home-title">What can I help with?</div>
+        <div class="home-cta-wrap">
+          <div class="home-cta-label">Click below to get started</div>
+          <button class="home-start-btn" onclick="startConversation()">
+            Help me pick a hotel in downtown Austin
+            <span class="home-arrow">&#8250;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="messages" id="messages">
+
+        <!-- SINGLE COMBINED ROUND (adopted from new design) -->
+        <div class="msg-row no-click"><div class="user-wrap"><div class="user-bubble">I'm looking for a hotel near downtown Austin for my upcoming trip &mdash; can you show me a couple of good options to choose from?</div></div></div>
+        <div class="msg-row" id="typing-1">
+          <div class="think-box" id="think-box">
+            <div class="think-box-head" id="think-head" onclick="toggleThink()">
+              <span class="th-spin" id="th-spin"></span>
+              <svg class="th-check" id="th-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="th-title" id="th-title">Thinking&hellip;</span>
+              <span class="th-hint-show">Show details</span>
+              <span class="th-chevron" id="th-chevron">&#9662;</span>
+            </div>
+            <div class="think-box-body" id="think-body">
+              <div class="th-scroll" id="th-scroll">
+              <div class="th-trace" id="th-trace">
+
+                <!-- Short reasoning: line 1 -->
+                <div class="th-block" data-at="0">
+                  <div class="th-step">Understanding the request</div>
+                  <div class="th-note">I need a hotel near downtown Austin for a short trip.</div>
+                </div>
+
+                <!-- Short reasoning: line 2 -->
+                <div class="th-block" data-at="0">
+                  <div class="th-step">Picking good options</div>
+                  <div class="th-note">Let me show a couple of options.</div>
+                  <div class="th-sources">
+                    <div class="th-src" data-srcdelay="0"><span class="th-fav" style="background:#5b6470">C</span>CityStay Guide</div>
+                  </div>
+                </div>
+
+
+              </div>
+              </div><!-- /th-scroll -->
+              <div class="th-status" id="th-status"><span class="think-line">Thinking</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hidden-round" id="round-1">
+          <div class="msg-row fade-in no-click"><div class="asst-body">
+
+            <p><span class="hotel-name">Narden Hotel <span class="rating">&#9733;4.8</span> <span class="reviews">(1,000+ reviews)</span></span>Modern hotel 0.5 miles from downtown, a short walk from the river trail and the Congress Avenue restaurants. Rooms are 300 sq ft with a queen bed, work desk, mini-fridge, and rainfall shower. Free Wi-Fi, on-site caf&eacute; serving breakfast until 11 AM, fitness center, rooftop terrace, and a 24-hour front desk. Check-in at 3 PM, check-out by 11 AM. Guests often mention the quiet rooms and friendly staff. Free cancellation up to two days before arrival. 3-night total: $477, taxes and fees included. </p>
+
+            <p><span class="hotel-name">Talven Hotel <span class="rating">&#9733;4.8</span> <span class="reviews">(1,000+ reviews)</span></span>Contemporary hotel half a mile from downtown, an easy walk to the river trail and the restaurants on Congress Avenue. Each 300 sq ft room has a queen bed, work desk, mini-fridge, and rainfall shower. Free Wi-Fi, an on-site caf&eacute; with breakfast until 11 AM, a gym, rooftop terrace, and 24-hour front desk. Check-in from 3 PM, check-out by 11 AM. Guests frequently note the quiet rooms and friendly staff. Free cancellation up to two days before arrival. 3-night total: $477, taxes and fees excluded. </p>
+
+            <p>Let me know which one you'd like to book!</p>
+
+          
+
+          </div></div>
+
+        </div>
+
+      </div><!-- /messages -->
+
+      <div class="input-area no-click" id="input-area" style="display:none">
+        <div class="input-box"><input type="text" placeholder="Message ChatGPT" readonly/><button class="send-btn">&#8593;</button></div>
+        <div class="disclaimer">ChatGPT can make mistakes. Consider checking important information.</div>
+      </div>
+    </div><!-- /chat-area -->
+  </div><!-- /body-area -->
+</div><!-- /layout -->
+
+<script>
+function startConversation(){
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('messages').style.display='block';
+  var ia=document.getElementById('input-area');if(ia)ia.style.display='block';
+  var t=document.getElementById('typing-1');t.style.display='block';
+  runThinking();
+}
+
+/* Reasoning box: updates a live status line, progressively reveals trace
+   blocks (queries, sources, comparison table), then collapses to a
+   clickable "Thought for 30s" header that keeps the trace visible. */
+function runThinking(){
+  var t0=Date.now();
+  var box=document.getElementById('think-box');
+  if(box)box.classList.add('rolling');
+  var sc=document.getElementById('th-scroll');
+  var cur=null;   // block currently being written
+  function roll(){
+    if(sc){
+      if(cur && cur.offsetHeight > sc.clientHeight){
+        sc.scrollTop=Math.max(0,cur.offsetTop-4);   // tall block: keep its intro text in view
+      } else {
+        sc.scrollTop=sc.scrollHeight;               // otherwise keep the newest line at the bottom
+      }
+    }
+    scr();
+  }
+  var line=document.getElementById('th-status');
+  function set(t){line.innerHTML='<span class="think-line">'+t+'</span>';roll();}
+
+  /* Consistent pacing — tuned so the whole reasoning lasts ~30s */
+  var CHAR=13;    // ms per character while typing (smooth, like real streaming)
+  var ITEM=250;   // ms between revealed sub-items (constant)
+  var PAUSE=300;  // ms between blocks (short condition)
+
+  /* Status line shown while each block is being written */
+  var statuses=[
+    'Looking at what matters for a hotel near downtown Austin',
+    'Comparing the top options to show a couple of good picks'
+  ];
+
+  function typeNote(el,done){
+    var full=el.getAttribute('data-full');
+    if(full===null){full=el.textContent;el.setAttribute('data-full',full);}
+    el.textContent='';
+    el.classList.add('typing');
+    var i=0;
+    (function step(){
+      if(i>=full.length){el.classList.remove('typing');if(done)done();return;}
+      var ch=full.charAt(i++);
+      el.textContent=full.slice(0,i);
+      roll();
+      var d=CHAR;                                   // smooth base cadence
+      if(ch===',' || ch===';') d+=140;              // small breath at clauses
+      else if(ch==='.' || ch==='?' || ch==='!' || ch===':') d+=260; // longer at sentence ends
+      else if(ch===' ') d+=8;
+      setTimeout(step,d);
+    })();
+  }
+
+  /* Reveal one sub-item at a time at a constant interval */
+  function revealItems(items,idx,done){
+    if(idx>=items.length){if(done)done();return;}
+    items[idx].classList.add('in');
+    items[idx].classList.add('show');
+    roll();
+    setTimeout(function(){revealItems(items,idx+1,done);},ITEM);
+  }
+
+  var blocks=Array.prototype.slice.call(document.querySelectorAll('#th-trace .th-block'));
+
+  /* Process blocks strictly one after another: finish one, then the next */
+  function doBlock(n){
+    if(n>=blocks.length){finish();return;}
+    var b=blocks[n];
+    cur=b;
+    if(statuses[n])set(statuses[n]);
+    b.classList.add('show');
+    var note=b.querySelector('.th-note');
+    function afterNote(){
+      var items=Array.prototype.slice.call(b.querySelectorAll('.th-q, ol > li, ul > li, .th-src'));
+      revealItems(items,0,function(){
+        var tbl=b.querySelector('.th-tablewrap');
+        if(tbl){
+          tbl.classList.add('in');
+          // enlarge the window so the whole stage (intro text + table) is visible
+          if(sc)sc.style.maxHeight=Math.min(480,b.scrollHeight+16)+'px';
+          setTimeout(function(){
+            if(sc)sc.scrollTop=Math.max(0,b.offsetTop-4);  // keep the intro text at the top
+            scr();
+          },60);
+          setTimeout(function(){next(n);},600);
+        }
+        else{next(n);}
+      });
+    }
+    if(note){typeNote(note,afterNote);}else{afterNote();}
+  }
+  function next(n){setTimeout(function(){doBlock(n+1);},PAUSE);}
+
+  function finish(){
+    setTimeout(function(){
+      collapseThinking(Math.round((Date.now()-t0)/1000));   // real elapsed time
+      document.getElementById('round-1').style.display='block';
+      scr();
+      streamAnswer(function(){
+        scr();
+      });
+    },350);   // short condition: brief pause before the answer
+  }
+
+  set('Thinking');
+  setTimeout(function(){doBlock(0);},250);
+}
+
+/* Finish the reasoning box: stop rolling, swap spinner for a check, set
+   the summary title, and collapse it (still expandable to see everything). */
+function collapseThinking(seconds){
+  var spin=document.getElementById('th-spin');if(spin)spin.style.display='none';
+  var chk=document.getElementById('th-check');if(chk)chk.style.display='inline-block';
+  var title=document.getElementById('th-title');if(title)title.textContent='Thought for '+seconds+'s';
+  var status=document.getElementById('th-status');if(status)status.style.display='none';
+  var sc=document.getElementById('th-scroll');if(sc)sc.style.maxHeight='';
+  var box=document.getElementById('think-box');
+  if(box){box.classList.remove('rolling');box.classList.add('done');box.classList.add('collapsed');}
+  /* Default: participant has NOT expanded the finished thinking box */
+  try{
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount','0');
+    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming','never');
+  }catch(e){}
+  try{window.parent.postMessage({type:'thinkBoxExpanded',value:'0'},'*');}catch(e){}
+}
+
+/* --- Think box engagement tracking state --- */
+var tbOpenStart=null;    // timestamp when the finished box was last expanded (null = closed)
+var tbOpenTotal=0;       // accumulated open time in ms across expand/collapse cycles
+var tbToggleCount=0;     // number of times participant expanded the finished box
+var tbTimingSet=false;   // first-expansion timing recorded?
+
+/* Write current total open seconds to embedded data */
+function tbWriteTime(){
+  var total=tbOpenTotal+(tbOpenStart?(Date.now()-tbOpenStart):0);
+  var secs=String(Math.round(total/1000));
+  try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime',secs);}catch(e){}
+  try{window.parent.postMessage({type:'thinkBoxExpandTime',value:secs},'*');}catch(e){}
+}
+/* While the box is open, keep the saved value fresh every 2s so the time
+   is captured even if the participant advances with the box still open */
+setInterval(function(){if(tbOpenStart)tbWriteTime();},2000);
+
+/* Expand / collapse the reasoning box from its header */
+function toggleThink(){
+  var box=document.getElementById('think-box');
+  if(box){
+    var isDone=box.classList.contains('done');
+    var expanding=isDone && box.classList.contains('collapsed');
+    box.classList.toggle('collapsed');
+    if(expanding){
+      /* Participant clicked to unfold the thinking process after thinking finished */
+      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','1');}catch(e){}
+      try{window.parent.postMessage({type:'thinkBoxExpanded',value:'1'},'*');}catch(e){}
+      /* Count this expansion */
+      tbToggleCount++;
+      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount',String(tbToggleCount));}catch(e){}
+      try{window.parent.postMessage({type:'thinkBoxToggleCount',value:String(tbToggleCount)},'*');}catch(e){}
+      /* Start the open-time clock */
+      tbOpenStart=Date.now();
+    } else if(isDone && tbOpenStart){
+      /* Participant collapsed the box: bank the elapsed time */
+      tbOpenTotal+=Date.now()-tbOpenStart;
+      tbOpenStart=null;
+      tbWriteTime();
+    }
+  }
+  scr();
+}
+
+/* Smooth streaming: words fade in; table fades in as a whole block */
+function streamAnswer(done){
+  var body=document.querySelector('#round-1 .asst-body');
+  if(!body){if(done)done();return;}
+  var tmp=document.createElement('div');
+  tmp.innerHTML=body.innerHTML;
+  body.innerHTML='';
+
+  var ops=[];
+  (function walk(node){
+    Array.prototype.forEach.call(node.childNodes,function(n){
+      if(n.nodeType===3){
+        var parts=n.nodeValue.split(/(\s+)/);
+        for(var k=0;k<parts.length;k++){if(parts[k].length)ops.push({t:'text',v:parts[k]});}
+      } else if(n.nodeType===1){
+        if(n.tagName==='TABLE'){
+          ops.push({t:'block',el:n});
+        } else {
+          ops.push({t:'open',el:n});
+          walk(n);
+          ops.push({t:'close'});
+        }
+      }
+    });
+  })(tmp);
+
+  var stack=[body];
+  function top(){return stack[stack.length-1];}
+  var i=0;
+  function step(){
+    if(i>=ops.length){if(done)done();return;}
+    var op=ops[i++];
+    if(op.t==='open'){
+      var el=document.createElement(op.el.tagName);
+      Array.prototype.forEach.call(op.el.attributes,function(a){el.setAttribute(a.name,a.value);});
+      top().appendChild(el);stack.push(el);step();
+    } else if(op.t==='close'){
+      stack.pop();step();
+    } else if(op.t==='block'){
+      var clone=op.el.cloneNode(true);
+      clone.className=(clone.className?clone.className+' ':'')+'stream-fade';
+      top().appendChild(clone);scr();
+      setTimeout(step,180);
+    } else {
+      if(/\S/.test(op.v)){
+        var s=document.createElement('span');
+        s.className='stream-word';
+        s.textContent=op.v;
+        top().appendChild(s);scr();
+        setTimeout(step,14+Math.random()*22);
+      } else {
+        top().appendChild(document.createTextNode(op.v));step();
+      }
+    }
+  }
+  step();
+}
+
+function scr(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})},100)}
+
+</script>
+</body>
+</html>
