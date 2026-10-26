@@ -500,7 +500,7 @@ function runThinking(){
       document.getElementById('round-1').style.display='block';
       scr();
       streamAnswer(function(){
-        scr();
+        scr();setTimeout(scr,600);
       });
     },900);   // brief pause before the results
   }
@@ -631,7 +631,11 @@ function streamAnswer(done){
   step();
 }
 
-function scr(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})},100)}
+function scr(){setTimeout(function(){
+  var m=document.getElementById('messages');
+  if(m){m.scrollTo({top:m.scrollHeight,behavior:'smooth'});}
+  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+},100)}
 
 /* ===== Browsing pane engine: mock pages built in HTML, driven by the action steps ===== */
 var SITES={
