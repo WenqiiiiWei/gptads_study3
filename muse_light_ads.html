@@ -277,25 +277,17 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
 
                 <div class="th-block" data-at="0">
                   <div class="th-step">Searching</div>
-                  <div class="th-note">Looking for hotels near downtown Austin with 3-night availability.</div>
-                  <div class="th-queries">
-                    <div class="th-q"><span class="mag">&#128269;</span>&ldquo;hotels near downtown Austin &middot; 3 nights&rdquo;</div>
-                  </div>
+                  <div class="th-note">Checking CityStay Guide for hotels near downtown Austin.</div>
                 </div>
 
                 <div class="th-block" data-at="0">
-                  <div class="th-step">Reading listings</div>
-                  <div class="th-note">Checking the top-rated listings on CityStay Guide.</div>
+                  <div class="th-step">Found</div>
                   <ul>
-                    <li data-hl="narden">Narden Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
-                    <li data-hl="talven">Talven Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
+                    <li data-hl="narden">Narden Hotel <span class="act-ok">&#10003;</span></li>
+                    <li data-hl="talven">Talven Hotel <span class="act-ok">&#10003;</span></li>
                   </ul>
                 </div>
 
-                <div class="th-block" data-at="0">
-                  <div class="th-step">Ready to book</div>
-                  <div class="th-note">Two highly rated options within half a mile of downtown, both with free cancellation.</div>
-                </div>
 
 
 
@@ -447,15 +439,14 @@ function runThinking(){
   function set(t){line.innerHTML='<span class="think-line">'+t+'</span>';roll();}
 
   /* Consistent pacing — tuned so the whole reasoning lasts ~30s */
-  var CHAR=13;    // ms per character while typing (smooth, like real streaming)
-  var ITEM=250;   // ms between revealed sub-items (constant)
-  var PAUSE=300;  // ms between blocks (light condition)
+  var CHAR=7;     // ms per character while typing (light condition: fast)
+  var ITEM=180;   // ms between revealed sub-items (constant)
+  var PAUSE=200;  // ms between blocks (light condition)
 
   /* Status line shown while each block is being written */
   var statuses=[
     'Searching CityStay Guide',
-    'Reading the top listings',
-    'Preparing options you can book'
+    'Picking two options'
   ];
 
   function typeNote(el,done){
@@ -487,7 +478,7 @@ function runThinking(){
     var dl=items[idx].getAttribute('data-hl');if(dl)paneHighlight(dl);
     roll();
     var slow=items[idx].getAttribute('data-site')||items[idx].getAttribute('data-hotel')||items[idx].getAttribute('data-hl');
-    setTimeout(function(){revealItems(items,idx+1,done);},slow?1100:ITEM);
+    setTimeout(function(){revealItems(items,idx+1,done);},slow?600:ITEM);
   }
 
   var blocks=Array.prototype.slice.call(document.querySelectorAll('#th-trace .th-block'));
@@ -531,11 +522,11 @@ function runThinking(){
       streamAnswer(function(){
         setTimeout(function(){var ad=document.getElementById('native-ad');if(ad)ad.style.display='block';scr();},500);
       });
-    },400);   // light condition: brief pause before the results
+    },250);   // light condition: brief pause before the results
   }
 
   set('Working');
-  setTimeout(function(){doBlock(0);},250);
+  setTimeout(function(){doBlock(0);},150);
 }
 
 /* Finish the reasoning box: stop rolling, swap spinner for a check, set
@@ -747,7 +738,7 @@ function paneNav(s,path,html){
   document.getElementById('b-addr').innerHTML='<span class="lock">&#128274;</span>'+S.host+(path||S.path);
   var p=document.getElementById('b-page');
   p.innerHTML='<div class="pg"><div class="skel" style="width:55%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:40%"></div></div>';
-  setTimeout(function(){p.innerHTML='<div class="pg">'+html+'</div>';p.scrollTop=0;},420);
+  setTimeout(function(){p.innerHTML='<div class="pg">'+html+'</div>';p.scrollTop=0;},250);
 }
 function paneStart(){
   paneT0=Date.now();
