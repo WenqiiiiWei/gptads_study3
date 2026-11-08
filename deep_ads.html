@@ -265,14 +265,14 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
           </div></div>
 
         <!-- NATIVE AD — revealed after the answer finishes streaming -->
-        <div id="native-ad" style="display:none;padding:4px 8% 14px">
-          <div style="border:1px solid #e0e0e0;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+        <div id="native-ad" style="display:none;padding:4px 8% 14px" onclick="adCardClicked(event)">
+          <div style="border:2px solid #1f6f8b;border-radius:12px;background:#fff;box-shadow:0 3px 12px rgba(31,111,139,.22)">
 
             <!-- Header row: logo + brand + Sponsored + menu -->
-            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px 0">
-              <div style="width:26px;height:26px;border-radius:50%;background:#1f6f8b;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">T</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 0">
+              <div style="width:38px;height:38px;border-radius:50%;background:#1f6f8b;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.15)">T</div>
               <div style="flex:1;min-width:0">
-                <span style="font-size:13px;font-weight:700;color:#202124">Talven Hotel</span>
+                <span style="font-size:18px;font-weight:800;color:#1f6f8b;letter-spacing:.2px">Talven Hotel</span>
               </div>
               <span style="font-size:10px;color:#d93025;font-weight:600;flex-shrink:0;margin-right:2px">Sponsored</span>
               <span id="ad-menu-btn" onclick="toggleAdMenu(event)" style="font-size:16px;color:#bbb;padding:0 2px;flex-shrink:0;cursor:pointer;user-select:none;position:relative">&#8943;
@@ -290,17 +290,17 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
             </div>
 
             <!-- Tagline -->
-            <div style="padding:4px 12px 8px;font-size:12px;color:#4d5156;line-height:1.45">Quiet rooms half a mile from downtown Austin &mdash; book your stay with free cancellation.</div>
+            <div style="padding:6px 14px 10px;font-size:13px;color:#4d5156;line-height:1.45">Quiet rooms half a mile from downtown Austin &mdash; book your stay with free cancellation.</div>
 
             <!-- Product card -->
             <div style="margin:0 10px 10px;border:1px solid #eaeaea;border-radius:10px;background:#fafafa;display:flex;align-items:center;gap:10px;padding:8px 10px">
                 <img style="width:48px;height:48px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0;border:1px solid #f0f0f0" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='10' y='14' width='44' height='40' rx='3' fill='%231f6f8b'/><rect x='26' y='40' width='12' height='14' fill='%23ffffff'/><g fill='%23ffffff'><rect x='16' y='20' width='7' height='7'/><rect x='28' y='20' width='7' height='7'/><rect x='40' y='20' width='7' height='7'/><rect x='16' y='30' width='7' height='7'/><rect x='28' y='30' width='7' height='7'/><rect x='40' y='30' width='7' height='7'/></g><rect x='6' y='10' width='52' height='5' rx='2' fill='%23155a73'/></svg>" alt="Talven Hotel"/>
                 <div style="flex:1;min-width:0">
-                  <div style="font-size:12.5px;line-height:1.3;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="font-weight:700;color:#202124">Talven Hotel</span><span style="font-size:11px;color:#5f6368;font-weight:400">&nbsp;&nbsp;&#9733;4.8 &middot; 0.5 mi from downtown</span></div>
-                  <div style="font-size:12.5px;font-weight:700;color:#202124">$477 / 3 nights</div>
+                  <div style="font-size:12.5px;line-height:1.3;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="font-size:15px;font-weight:800;color:#1f6f8b">Talven Hotel</span><span style="font-size:11px;color:#5f6368;font-weight:400">&nbsp;&nbsp;&#9733;4.8 &middot; 0.5 mi from downtown</span></div>
+                  <div style="font-size:14px;font-weight:700;color:#202124">$477 / 3 nights</div>
                 </div>
                 <!-- Book Now button -->
-                <a href="javascript:void(0);" onclick="try{Qualtrics.SurveyEngine.setEmbeddedData('ShopNowClicked','1');}catch(e){} window.parent.postMessage({type:'shopNowClicked'},'*'); this.style.background='#155a73'; this.textContent='Redirecting...'; setTimeout(function(){try{document.getElementById('NextButton').click();}catch(e){}try{window.parent.document.getElementById('NextButton').click();}catch(e){}},300);" style="flex-shrink:0;padding:7px 14px;background:#1f6f8b;color:#fff;text-align:center;font-size:12.5px;font-weight:600;border-radius:7px;text-decoration:none;font-family:inherit;cursor:pointer;white-space:nowrap">Book Now</a>
+                <a href="javascript:void(0);" onclick="bookNowClicked(this);" style="flex-shrink:0;padding:9px 18px;background:#1f6f8b;color:#fff;text-align:center;font-size:13.5px;font-weight:700;border-radius:8px;text-decoration:none;font-family:inherit;cursor:pointer;white-space:nowrap">Book Now</a>
             </div>
 
           </div>
@@ -319,6 +319,15 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
 </div><!-- /layout -->
 
 <script>
+/* ONE logging field: every metric goes into AdLog (JSON string) */
+var adLog={};            // everything also goes into ONE field: AdLog (JSON string)
+function adSet(k,v){
+  adLog[k]=String(v);
+  try{Qualtrics.SurveyEngine.setEmbeddedData(k,String(v));}catch(e){}
+  try{Qualtrics.SurveyEngine.setEmbeddedData('AdLog',JSON.stringify(adLog));}catch(e){}
+  try{window.parent.postMessage({type:'adData',key:k,value:String(v),log:JSON.stringify(adLog)},'*');}catch(e){}
+}
+
 function startConversation(){
   document.getElementById('home-screen').style.display='none';
   document.getElementById('messages').style.display='block';
@@ -429,7 +438,7 @@ function runThinking(){
       document.getElementById('round-1').style.display='block';
       scr();
       streamAnswer(function(){
-        setTimeout(function(){var ad=document.getElementById('native-ad');if(ad)ad.style.display='block';scr();},500);
+        setTimeout(function(){var ad=document.getElementById('native-ad');if(ad){ad.style.display='block';adMark();}scr();},500);
       });
     },1800);   // let the finished table sit ~1s longer before the real output
   }
@@ -449,13 +458,10 @@ function collapseThinking(seconds){
   var box=document.getElementById('think-box');
   if(box){box.classList.remove('rolling');box.classList.add('done');box.classList.add('collapsed');}
   /* Default: participant has NOT expanded the finished thinking box */
-  try{
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming','never');
-  }catch(e){}
-  try{window.parent.postMessage({type:'thinkBoxExpanded',value:'0'},'*');}catch(e){}
+  adSet('ThinkBoxExpanded','0');
+  adSet('ThinkBoxExpandTime','0');
+  adSet('ThinkBoxToggleCount','0');
+  adSet('ThinkBoxExpandTiming','never');
 }
 
 /* --- Think box engagement tracking state --- */
@@ -468,8 +474,7 @@ var tbTimingSet=false;   // first-expansion timing recorded?
 function tbWriteTime(){
   var total=tbOpenTotal+(tbOpenStart?(Date.now()-tbOpenStart):0);
   var secs=String(Math.round(total/1000));
-  try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime',secs);}catch(e){}
-  try{window.parent.postMessage({type:'thinkBoxExpandTime',value:secs},'*');}catch(e){}
+  adSet('ThinkBoxExpandTime',secs);
 }
 /* While the box is open, keep the saved value fresh every 2s so the time
    is captured even if the participant advances with the box still open */
@@ -484,19 +489,16 @@ function toggleThink(){
     box.classList.toggle('collapsed');
     if(expanding){
       /* Participant clicked to unfold the thinking process after thinking finished */
-      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','1');}catch(e){}
-      try{window.parent.postMessage({type:'thinkBoxExpanded',value:'1'},'*');}catch(e){}
+      adSet('ThinkBoxExpanded','1');
       /* Count this expansion */
       tbToggleCount++;
-      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount',String(tbToggleCount));}catch(e){}
-      try{window.parent.postMessage({type:'thinkBoxToggleCount',value:String(tbToggleCount)},'*');}catch(e){}
+      adSet('ThinkBoxToggleCount',tbToggleCount);
       /* First expansion only: was the ad already on screen? */
       if(!tbTimingSet){
         tbTimingSet=true;
         var ad=document.getElementById('native-ad');
         var timing=(ad && ad.style.display==='block')?'after_ad':'before_ad';
-        try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming',timing);}catch(e){}
-        try{window.parent.postMessage({type:'thinkBoxExpandTiming',value:timing},'*');}catch(e){}
+        adSet('ThinkBoxExpandTiming',timing);
       }
       /* Start the open-time clock */
       tbOpenStart=Date.now();
@@ -570,6 +572,32 @@ function streamAnswer(done){
 
 function scr(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})},100)}
 
+/* --- Ad click tracking (no redirect / no auto-advance) --- */
+var adShownAt=null;      // timestamp when the ad became visible
+var adClickCount=0;      // clicks anywhere on the ad card
+var bookNowCount=0;      // clicks on the Book Now button
+function adMark(){ if(adShownAt===null) adShownAt=Date.now(); }
+
+/* Any click inside the ad card (brand, logo, tagline, button, menu) */
+function adCardClicked(e){
+  adClickCount++;
+  if(adClickCount===1){
+    adSet('AdClicked','1');
+    adSet('AdClickLatency', adShownAt?Math.round((Date.now()-adShownAt)/1000):'');
+  }
+  adSet('AdClickCount',adClickCount);
+}
+/* Book Now: record only, stay on the page, show confirmation */
+function bookNowClicked(btn){
+  bookNowCount++;
+  adSet('ShopNowClicked','1');
+  adSet('BookNowCount',bookNowCount);
+  if(bookNowCount===1) adSet('BookNowLatency', adShownAt?Math.round((Date.now()-adShownAt)/1000):'');
+  try{window.parent.postMessage({type:'shopNowClicked'},'*');}catch(e){}
+  btn.style.background='#155a73';
+  btn.textContent='\u2713 Selected';
+}
+
 /* Ad Menu Functions */
 function toggleAdMenu(e){
   e.stopPropagation();
@@ -579,10 +607,8 @@ function toggleAdMenu(e){
 }
 
 function dismissAd(reason){
-  try{
-    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissed','1');
-    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissReason',reason);
-  }catch(e){}
+  adSet('AdDismissed','1');
+  adSet('AdDismissReason',reason);
   try{
     window.parent.postMessage({type:'adDismissed',reason:reason},'*');
   }catch(e){}
