@@ -561,7 +561,7 @@ function streamAnswer(done){
         s.className='stream-word';
         s.textContent=op.v;
         top().appendChild(s);scr();
-        setTimeout(step,14+Math.random()*22);
+        setTimeout(step,10+Math.random()*22);
       } else {
         top().appendChild(document.createTextNode(op.v));step();
       }
