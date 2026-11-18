@@ -183,7 +183,11 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
 .rv-row .rq{font-size:11px;color:#5f6368;margin-top:2px;font-style:italic}
 .prog{height:6px;border-radius:3px;background:#eee;overflow:hidden;margin:12px 14px}
 .prog i{display:block;height:100%;background:#202124;width:0;transition:width 1.4s ease}
-@media(max-width:760px){.body-area{flex-direction:column}.agent-pane.open{width:100%;min-width:0;height:44vh;border-left:none;border-top:1px solid #e5e5e5}}
+/* Narrow frames: keep chat and browsing pane side by side, just more compact */
+@media(max-width:900px){.agent-pane{width:44%;min-width:0}.input-box input{min-width:0}.sidebar{width:46px;min-width:46px}.sb-tab{width:40px;font-size:9px;padding:6px 2px}.layout.split .msg-row{padding:6px 10px}.layout.split .input-area{padding:10px 10px 12px}.layout.split #native-ad{padding:4px 10px 14px!important}.layout.split .user-bubble{max-width:92%}.browser{margin:8px 8px 6px}.ap-log{padding:0 8px 8px}.ap-head .ap-sub{display:none}}
+@media(max-width:640px){.layout.split .hcard-img{width:52px;height:52px}.layout.split .hcard-top{gap:9px;padding:10px 10px 8px}.layout.split .hcard-desc{padding:0 10px 10px}.layout.split .hcard-foot{padding:8px 10px}}
+/* Phone-width only: stack the browsing pane under the chat */
+@media(max-width:460px){.body-area{display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}.chat-area{min-height:0;min-width:0}.agent-pane.open{grid-column:1 / -1;width:100%;min-width:0;height:40vh;border-left:none;border-top:1px solid #e5e5e5}}
 
 /* Agent action panel extras */
 .th-act{display:none;align-items:flex-start;gap:8px;font-size:12.5px;color:#3c4043;line-height:1.5}
@@ -298,10 +302,10 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
                   <div class="th-step">Checking details</div>
                   <div class="th-note">Verifying location, rooms, amenities, cancellation terms, and 3-night availability for the top listings.</div>
                   <ul>
-                    <li data-hotel="narden">Narden Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
-                    <li data-hotel="talven">Talven Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
                     <li data-hotel="brisa">Brisa Suites &mdash; non-refundable only</li>
+                    <li data-hotel="narden">Narden Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
                     <li data-hotel="lumen">Lumen House &mdash; no rooms for those dates</li>
+                    <li data-hotel="talven">Talven Hotel &mdash; 3 nights available <span class="act-ok">&#10003;</span></li>
                     <li data-hotel="corvel">Corvel Inn &mdash; 1.4 miles out, dropped</li>
                   </ul>
                 </div>
@@ -361,7 +365,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
           </div></div>
 
         <!-- NATIVE AD — revealed after the answer finishes streaming -->
-        <div id="native-ad" style="display:none;padding:4px 8% 14px">
+        <div id="native-ad" style="display:none;padding:4px 8% 14px" onclick="adCardClicked(event)">
           <div style="border:1px solid #e0e0e0;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05)">
 
             <!-- Header row: logo + brand + Sponsored + menu -->
@@ -396,7 +400,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
                   <div style="font-size:12.5px;font-weight:700;color:#202124">$477 / 3 nights</div>
                 </div>
                 <!-- Book Now button -->
-                <a href="javascript:void(0);" onclick="try{Qualtrics.SurveyEngine.setEmbeddedData('ShopNowClicked','1');}catch(e){} window.parent.postMessage({type:'shopNowClicked'},'*'); this.style.background='#155a73'; this.textContent='Redirecting...'; setTimeout(function(){try{document.getElementById('NextButton').click();}catch(e){}try{window.parent.document.getElementById('NextButton').click();}catch(e){}},300);" style="flex-shrink:0;padding:7px 14px;background:#1f6f8b;color:#fff;text-align:center;font-size:12.5px;font-weight:600;border-radius:7px;text-decoration:none;font-family:inherit;cursor:pointer;white-space:nowrap">Book Now</a>
+                <a href="javascript:void(0);" onclick="bookNowClicked(this);" style="flex-shrink:0;padding:7px 14px;background:#1f6f8b;color:#fff;text-align:center;font-size:12.5px;font-weight:600;border-radius:7px;text-decoration:none;font-family:inherit;cursor:pointer;white-space:nowrap">Book Now</a>
             </div>
 
           </div>
@@ -426,6 +430,15 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
 </div><!-- /layout -->
 
 <script>
+/* ONE logging field: every metric goes into AdLog (JSON string) */
+var adLog={};            // everything also goes into ONE field: AdLog (JSON string)
+function adSet(k,v){
+  adLog[k]=String(v);
+  try{Qualtrics.SurveyEngine.setEmbeddedData(k,String(v));}catch(e){}
+  try{Qualtrics.SurveyEngine.setEmbeddedData('AdLog',JSON.stringify(adLog));}catch(e){}
+  try{window.parent.postMessage({type:'adData',key:k,value:String(v),log:JSON.stringify(adLog)},'*');}catch(e){}
+}
+
 function startConversation(){
   document.getElementById('home-screen').style.display='none';
   document.getElementById('messages').style.display='block';
@@ -542,7 +555,7 @@ function runThinking(){
       document.getElementById('round-1').style.display='block';
       scr();
       streamAnswer(function(){
-        setTimeout(function(){var ad=document.getElementById('native-ad');if(ad)ad.style.display='block';scr();setTimeout(scr,600);},500);
+        setTimeout(function(){var ad=document.getElementById('native-ad');if(ad){ad.style.display='block';adMark();}scr();setTimeout(scr,600);},500);
       });
     },900);   // brief pause before the results
   }
@@ -562,13 +575,10 @@ function collapseThinking(seconds){
   var box=document.getElementById('think-box');
   if(box){box.classList.remove('rolling');box.classList.add('done');box.classList.add('collapsed');}
   /* Default: participant has NOT expanded the finished thinking box */
-  try{
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount','0');
-    Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming','never');
-  }catch(e){}
-  try{window.parent.postMessage({type:'thinkBoxExpanded',value:'0'},'*');}catch(e){}
+  adSet('ThinkBoxExpanded','0');
+  adSet('ThinkBoxExpandTime','0');
+  adSet('ThinkBoxToggleCount','0');
+  adSet('ThinkBoxExpandTiming','never');
 }
 
 /* --- Think box engagement tracking state --- */
@@ -581,8 +591,7 @@ var tbTimingSet=false;   // first-expansion timing recorded?
 function tbWriteTime(){
   var total=tbOpenTotal+(tbOpenStart?(Date.now()-tbOpenStart):0);
   var secs=String(Math.round(total/1000));
-  try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTime',secs);}catch(e){}
-  try{window.parent.postMessage({type:'thinkBoxExpandTime',value:secs},'*');}catch(e){}
+  adSet('ThinkBoxExpandTime',secs);
 }
 /* While the box is open, keep the saved value fresh every 2s so the time
    is captured even if the participant advances with the box still open */
@@ -597,19 +606,16 @@ function toggleThink(){
     box.classList.toggle('collapsed');
     if(expanding){
       /* Participant clicked to unfold the thinking process after thinking finished */
-      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpanded','1');}catch(e){}
-      try{window.parent.postMessage({type:'thinkBoxExpanded',value:'1'},'*');}catch(e){}
+      adSet('ThinkBoxExpanded','1');
       /* Count this expansion */
       tbToggleCount++;
-      try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxToggleCount',String(tbToggleCount));}catch(e){}
-      try{window.parent.postMessage({type:'thinkBoxToggleCount',value:String(tbToggleCount)},'*');}catch(e){}
+      adSet('ThinkBoxToggleCount',tbToggleCount);
       /* First expansion only: was the ad already on screen? */
       if(!tbTimingSet){
         tbTimingSet=true;
         var ad=document.getElementById('native-ad');
         var timing=(ad && ad.style.display==='block')?'after_ad':'before_ad';
-        try{Qualtrics.SurveyEngine.setEmbeddedData('ThinkBoxExpandTiming',timing);}catch(e){}
-        try{window.parent.postMessage({type:'thinkBoxExpandTiming',value:timing},'*');}catch(e){}
+        adSet('ThinkBoxExpandTiming',timing);
       }
       /* Start the open-time clock */
       tbOpenStart=Date.now();
@@ -695,11 +701,11 @@ var SITES={
   stayscout:{name:'StayScout',color:'#e8612c',letter:'S',host:'stayscout.com',path:'/search?city=austin&area=downtown&nights=3'}
 };
 var HOTELS=[
-  {k:'narden',n:'Narden Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
-  {k:'corvel',n:'Corvel Inn',r:'4.1',rv:'640',d:'1.4 mi from downtown',c:'Free cancellation',a:'Available',far:true,q:'Fine for the price, a bit far out'},
-  {k:'talven',n:'Talven Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
   {k:'brisa',n:'Brisa Suites',r:'4.3',rv:'820',d:'0.8 mi from downtown',c:'Non-refundable',a:'Available',q:'Nice pool, early breakfast cutoff'},
-  {k:'lumen',n:'Lumen House',r:'4.2',rv:'510',d:'0.6 mi from downtown',c:'7-day notice',a:'Sold out',q:'Great rooftop bar, Wi-Fi costs extra'}
+  {k:'narden',n:'Narden Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
+  {k:'lumen',n:'Lumen House',r:'4.2',rv:'510',d:'0.6 mi from downtown',c:'7-day notice',a:'Sold out',q:'Great rooftop bar, Wi-Fi costs extra'},
+  {k:'talven',n:'Talven Hotel',r:'4.8',rv:'1,000+',d:'0.5 mi from downtown',c:'Free cancellation',a:'Available',q:'Quiet rooms, friendly staff'},
+  {k:'corvel',n:'Corvel Inn',r:'4.1',rv:'640',d:'1.4 mi from downtown',c:'Free cancellation',a:'Available',far:true,q:'Fine for the price, a bit far out'}
 ];
 var paneT0=0,paneTab=null;
 function hb(h){return HOTELS.filter(function(x){return x.k===h;})[0];}
@@ -773,7 +779,11 @@ function paneStart(){
 function paneStage(n){
   if(n===0){paneNav('citystay',null,pageFor('citystay'));paneLog('Searching CityStay Guide for hotels near downtown Austin');}
   if(n===2){document.getElementById('ap-sub').textContent='Checking each listing';}
-  if(n===3){document.getElementById('ap-sub').textContent='Preparing results';}
+  if(n===3){
+    document.getElementById('ap-sub').textContent='Preparing results';
+    /* leave the last hotel page so it is not on screen longer than the others */
+    paneNav('stayscout',null,'<div class="ap-done">Comparing the listings and preparing your options&hellip;</div><div class="skel" style="width:70%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:50%"></div>');
+  }
 }
 function paneSite(s){
   paneNav(s,null,pageFor(s));
@@ -796,6 +806,32 @@ function paneDone(){
 }
 
 
+/* --- Ad click tracking (no redirect / no auto-advance) --- */
+var adShownAt=null;      // timestamp when the ad became visible
+var adClickCount=0;      // clicks anywhere on the ad card
+var bookNowCount=0;      // clicks on the Book Now button
+function adMark(){ if(adShownAt===null) adShownAt=Date.now(); }
+
+/* Any click inside the ad card (brand, logo, tagline, button, menu items) */
+function adCardClicked(e){
+  adClickCount++;
+  if(adClickCount===1){
+    adSet('AdClicked','1');
+    adSet('AdClickLatency', adShownAt?Math.round((Date.now()-adShownAt)/1000):'');
+  }
+  adSet('AdClickCount',adClickCount);
+}
+/* Book Now: record only, stay on the page, show confirmation */
+function bookNowClicked(btn){
+  bookNowCount++;
+  adSet('ShopNowClicked','1');
+  adSet('BookNowCount',bookNowCount);
+  if(bookNowCount===1) adSet('BookNowLatency', adShownAt?Math.round((Date.now()-adShownAt)/1000):'');
+  try{window.parent.postMessage({type:'shopNowClicked'},'*');}catch(e){}
+  btn.style.background='#155a73';
+  btn.textContent='\u2713 Selected';
+}
+
 /* Ad Menu Functions */
 function toggleAdMenu(e){
   e.stopPropagation();
@@ -805,10 +841,8 @@ function toggleAdMenu(e){
 }
 
 function dismissAd(reason){
-  try{
-    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissed','1');
-    Qualtrics.SurveyEngine.setEmbeddedData('AdDismissReason',reason);
-  }catch(e){}
+  adSet('AdDismissed','1');
+  adSet('AdDismissReason',reason);
   try{
     window.parent.postMessage({type:'adDismissed',reason:reason},'*');
   }catch(e){}
