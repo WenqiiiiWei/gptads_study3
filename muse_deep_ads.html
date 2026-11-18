@@ -479,7 +479,7 @@ function runThinking(){
   /* Consistent pacing — tuned so the whole reasoning lasts ~30s */
   var CHAR=13;    // ms per character while typing (smooth, like real streaming)
   var ITEM=320;   // ms between revealed sub-items (constant)
-  var PAUSE=500;  // ms between blocks
+  var PAUSE=900;  // ms between blocks
 
   /* Status line shown while each block is being written */
   var statuses=[
@@ -489,22 +489,36 @@ function runThinking(){
     'Preparing options you can book'
   ];
 
+  /* Typing is driven by the clock, not by counting timers: if the browser slows
+     timers down (background tab, slow computer) the text catches up instead of
+     stretching the whole search. On a normal computer it looks the same as before. */
   function typeNote(el,done){
     var full=el.getAttribute('data-full');
     if(full===null){full=el.textContent;el.setAttribute('data-full',full);}
     el.textContent='';
     el.classList.add('typing');
-    var i=0;
-    (function step(){
-      if(i>=full.length){el.classList.remove('typing');if(done)done();return;}
-      var ch=full.charAt(i++);
-      el.textContent=full.slice(0,i);
-      roll();
+    var due=[],t=0;                                  // due[i] = ms at which character i has appeared
+    for(var k=0;k<full.length;k++){
+      var ch=full.charAt(k);
       var d=CHAR;                                   // smooth base cadence
       if(ch===',' || ch===';') d+=140;              // small breath at clauses
       else if(ch==='.' || ch==='?' || ch==='!' || ch===':') d+=260; // longer at sentence ends
       else if(ch===' ') d+=8;
-      setTimeout(step,d);
+      t+=d;due.push(t);
+    }
+    var start=Date.now(),i=0;
+    (function step(){
+      var el2=Date.now()-start;
+      if(i<full.length)i++;                          // always at least one new character
+      while(i<full.length && due[i-1]<=el2)i++;      // catch up if timers ran late
+      el.textContent=full.slice(0,i);
+      roll();
+      if(i>=full.length){
+        el.classList.remove('typing');
+        setTimeout(function(){if(done)done();},Math.max(0,due[full.length-1]-(Date.now()-start)));
+        return;
+      }
+      setTimeout(step,Math.max(4,due[i-1]-(Date.now()-start)));
     })();
   }
 
@@ -517,7 +531,8 @@ function runThinking(){
     var dh=items[idx].getAttribute('data-hotel');if(dh)paneDetail(dh);
     roll();
     var slow=items[idx].getAttribute('data-site')||items[idx].getAttribute('data-hotel');
-    setTimeout(function(){revealItems(items,idx+1,done);},slow?1700:ITEM);
+    var lastHotel=items[idx].getAttribute('data-hotel') && idx===items.length-1;   // last hotel: the pause before the next step already adds PAUSE
+    setTimeout(function(){revealItems(items,idx+1,done);},slow?(lastHotel?2300-PAUSE:2300):ITEM);   // time each site / hotel page stays up
   }
 
   var blocks=Array.prototype.slice.call(document.querySelectorAll('#th-trace .th-block'));

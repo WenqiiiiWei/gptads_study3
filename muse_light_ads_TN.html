@@ -462,22 +462,36 @@ function runThinking(){
     'Picking two options'
   ];
 
+  /* Typing is driven by the clock, not by counting timers: if the browser slows
+     timers down (background tab, slow computer) the text catches up instead of
+     stretching the whole search. On a normal computer it looks the same as before. */
   function typeNote(el,done){
     var full=el.getAttribute('data-full');
     if(full===null){full=el.textContent;el.setAttribute('data-full',full);}
     el.textContent='';
     el.classList.add('typing');
-    var i=0;
-    (function step(){
-      if(i>=full.length){el.classList.remove('typing');if(done)done();return;}
-      var ch=full.charAt(i++);
-      el.textContent=full.slice(0,i);
-      roll();
+    var due=[],t=0;                                  // due[i] = ms at which character i has appeared
+    for(var k=0;k<full.length;k++){
+      var ch=full.charAt(k);
       var d=CHAR;                                   // smooth base cadence
       if(ch===',' || ch===';') d+=140;              // small breath at clauses
       else if(ch==='.' || ch==='?' || ch==='!' || ch===':') d+=260; // longer at sentence ends
       else if(ch===' ') d+=8;
-      setTimeout(step,d);
+      t+=d;due.push(t);
+    }
+    var start=Date.now(),i=0;
+    (function step(){
+      var el2=Date.now()-start;
+      if(i<full.length)i++;                          // always at least one new character
+      while(i<full.length && due[i-1]<=el2)i++;      // catch up if timers ran late
+      el.textContent=full.slice(0,i);
+      roll();
+      if(i>=full.length){
+        el.classList.remove('typing');
+        setTimeout(function(){if(done)done();},Math.max(0,due[full.length-1]-(Date.now()-start)));
+        return;
+      }
+      setTimeout(step,Math.max(4,due[i-1]-(Date.now()-start)));
     })();
   }
 
