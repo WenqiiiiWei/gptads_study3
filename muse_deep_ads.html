@@ -189,6 +189,10 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;background:#
 /* Phone-width only: stack the browsing pane under the chat */
 @media(max-width:460px){.body-area{display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}.chat-area{min-height:0;min-width:0}.agent-pane.open{grid-column:1 / -1;width:100%;min-width:0;height:40vh;border-left:none;border-top:1px solid #e5e5e5}}
 
+/* Text-only extras on the mock hotel pages (no images) */
+.dsec{font-size:11px;font-weight:600;color:#5f6368;margin:12px 0 4px}
+.dfine{font-size:11px;color:#80868b;line-height:1.5}
+
 /* Agent action panel extras */
 .th-act{display:none;align-items:flex-start;gap:8px;font-size:12.5px;color:#3c4043;line-height:1.5}
 .th-act.in{display:flex;animation:wordIn .35s ease forwards}
@@ -719,7 +723,7 @@ function listRows(opts){
     if(opts.mode==='avail'){badge=(h.a==='Available')?'<span class="badge">3 nights available</span>':'<span class="badge red">Sold out</span>';}
     else if(opts.mode==='cancel'){badge=(h.c==='Free cancellation')?'<span class="badge">Free cancellation</span>':(h.c==='Non-refundable'?'<span class="badge red">Non-refundable</span>':'<span class="badge amber">'+h.c+'</span>');}
     else{badge=(h.c==='Free cancellation')?'<span class="badge gray">Free cancellation</span>':'';}
-    return '<div class="'+cls+'" data-k="'+h.k+'"><div class="lst-thumb"></div><div class="lst-body"><div class="lst-name">'+h.n+'</div><div class="lst-meta">'+meta+' '+badge+'</div></div></div>';
+    return '<div class="'+cls+'" data-k="'+h.k+'"><div class="lst-body"><div class="lst-name">'+h.n+'</div><div class="lst-meta">'+meta+' '+badge+'</div></div></div>';
   }).join('');
 }
 function pageFor(s){
@@ -743,7 +747,9 @@ function detailPage(k){
   else if(h.c!=='Free cancellation')avail='<span>3 nights &middot; 1 queen room</span><span class="badge amber">'+h.c+'</span>';
   else if(h.far)avail='<span>3 nights &middot; 1 queen room</span><span class="badge amber">Available &middot; 1.4 mi from downtown</span>';
   else avail='<span>3 nights &middot; 1 queen room</span><b>&#10003; Available &middot; Free cancellation</b>';
-  return siteHead('stayscout')+'<div class="detail"><div class="hero"></div><h2>'+h.n+'</h2><div class="sub">&#9733;'+h.r+' ('+h.rv+' reviews) &middot; '+h.d+' &middot; Check-in 3 PM &middot; Check-out 11 AM</div><p>'+desc+'</p><div class="avail">'+avail+'</div></div>';
+  return siteHead('stayscout')+'<div class="detail"><h2>'+h.n+'</h2><div class="sub">&#9733;'+h.r+' ('+h.rv+' reviews) &middot; '+h.d+' &middot; Check-in 3 PM &middot; Check-out 11 AM</div><p>'+desc+'</p><div class="avail">'+avail+'</div>'
+    +'<div class="dsec">Location</div><div class="dfine">Austin, TX &middot; '+h.d+'</div>'
+    +'<div class="dsec">Policies</div><div class="dfine">Check-in from 3 PM &middot; Check-out by 11 AM</div></div>';
 }
 function paneLog(msg,ok){
   var l=document.getElementById('ap-log');if(!l)return;
